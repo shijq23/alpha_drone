@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/x11vnc -auth guess -forever -loop -noxdamage -repeat -rfbauth /root/.vnc/passwd -rfbport 5900 -shared --display :0  -ncache_cr
+ExecStart=/usr/bin/x11vnc -auth guess -forever -loop -bg -noxdamage -noxfixes -noxrecord -xkb -repeat -norc -ncache_cr -shared -rfbauth /etc/x11vnc.passwd -rfbport 5900 --display :0
 
 Restart=on-failure
 
