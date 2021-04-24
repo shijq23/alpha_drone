@@ -19,4 +19,4 @@ echo "done"
 
 echo "x11vnc service installed sucessfully!"
 echo ""
-echo "Please run x11vnc -storepasswd (as root)"
+echo "Please run x11vnc -storepasswd /etc/x11vnc.passwd (as root)"
