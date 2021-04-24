@@ -7,7 +7,7 @@ auto start x11vnc server on boot for Wind River Linux xfce
 ```bash
     #x11vnc -storepasswd /etc/x11vnc.passwd
     #chown root.root /etc/x11vnc.passwd
-    #chmod 644 /etc/x11vnc.passwd
+    #chmod 600 /etc/x11vnc.passwd
     #./install.sh
 ```
 
