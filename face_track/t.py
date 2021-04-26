@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import os
+import time
+import logging
 
 import cv2
 import numpy as np
-from djitellopy import Tello
+from mockdjitellopy import Tello
 
 cv2_base_dir = os.path.dirname(os.path.abspath(cv2.__file__))
 default_face = os.path.join(cv2_base_dir, "data",
@@ -23,6 +25,8 @@ pid = [0.4, 0.4, 0]
 pError = 0
 w, h = 360, 240
 
+Tello.LOGGER.setLevel(logging.DEBUG)
+
 
 def initTello():
     drone = Tello()
@@ -30,13 +34,16 @@ def initTello():
     print("battery", drone.get_battery())
     drone.streamoff()
     drone.streamon()
+    #time.sleep(0.5)
     return drone
+
 
 def telloGetFrame(drone, w=360, h=240):
     frame = drone.get_frame_read()
     img = frame.frame
     img = cv2.resize(img, (w, h))
     return img
+
 
 def trackFace(tello, info, w, pid, pError):
     area = info[1]
@@ -53,11 +60,11 @@ def trackFace(tello, info, w, pid, pError):
         if area > fbRange[1]:
             fb = -20  # backward
         elif area < fbRange[0] and area > 0:
-            fb = 20  # forward 
+            fb = 20  # forward
         else:
             fb = 0  # stay
 
-    #tello.send_rc_control(0, fb, 0, speed)
+    tello.send_rc_control(0, fb, 0, speed)
     #print("fb", fb, "area", area)
     return error
 
@@ -93,15 +100,27 @@ def findFace(img):
         return img, [[0, 0], 0]
 
 
+def putFPS(img, prev_time):
+    cur_time = time.time()
+    fps = 1.0 / (cur_time - prev_time)
+    fps = int(fps)
+    cv2.putText(img, str(fps), (7, 30), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                (100, 255, 0), 1, cv2.LINE_AA)
+    return cur_time
+
+
 tello = initTello()
+prev_time = time.time()
 while True:
     img = telloGetFrame(tello, w, h)
     img, info = findFace(img)
     pError = trackFace(tello, info, w, pid, pError)
     #print("center", info[0], "area", info[1])
-    cv2.imshow("Output", img)
-    if cv2.waitKey(50) != -1:
+    prev_time = putFPS(img, prev_time)
+    cv2.imshow("alpha drone", img)
+    if cv2.waitKey(1) != -1:
         break
 
 #cap.release()
 cv2.destroyAllWindows()
+#tello.end()
