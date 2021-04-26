@@ -30,22 +30,22 @@ def findFace(img):
     imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     faces = faceCascade.detectMultiScale(imgGray, 1.1, 6)
 
-    myFaceListC = []
-    myFaceListArea = []
+    myFaceListC = []  # face center point
+    myFaceListArea = []  # face area
 
     for (x, y, w, h) in faces:
         cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
-        cx = x + w // 2
-        cy = y + h // 2
-        area = w * h
+        cx = x + w // 2   # center x
+        cy = y + h // 2   # center y
+        area = w * h      # area
         myFaceListArea.append(area)
         myFaceListC.append([cx, cy])
 
     if len(myFaceListArea) != 0:
-        i = myFaceListArea.index(max(myFaceListArea))
+        i = myFaceListArea.index(max(myFaceListArea))  # index of largest face
         return img, [myFaceListC[i], myFaceListArea[i]]
     else:
-        return img, [[0, 0], 0]
+        return img, [[0, 0], 0]  # face not detect
 
 
 def trackFace(myDrone, info, w, pid, pError):
