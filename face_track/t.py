@@ -8,6 +8,7 @@ import logging
 import cv2
 import numpy as np
 from mockdjitellopy import Tello
+from pid import PID
 
 cv2_base_dir = os.path.dirname(os.path.abspath(cv2.__file__))
 default_face = os.path.join(cv2_base_dir, "data",
@@ -20,12 +21,21 @@ if face_cascade.empty():
     print("--(!)Error loading face cascade", default_face)
     exit(0)
 
-fbRange = [6200, 10000]
+fbRange = [6200, 10000]  # forward backward measured in area
+udRange = [80, 160]  # up down measured in height
+lrRange = [110, 220]  # lef right measured in width
+yawRange = [110, 220]  # yaw measued in width
 pid = [0.4, 0.4, 0]
 pError = 0
 w, h = 360, 240
 
+fb_pid = PID(kP=-0.07, kI=-0.00001, kD=0.001)
+ud_pid = PID(kP=0.7, kI=0.0001, kD=-0.001)
+lr_pid = PID(kP=0.7, kI=0.0001, kD=-0.001)
+yaw_pid = PID(kP=0.7, kI=0.0001, kD=-0.001)
+
 Tello.LOGGER.setLevel(logging.DEBUG)
+#PID.LOGGER.setLevel(logging.DEBUG)
 
 
 def initTello():
@@ -45,28 +55,39 @@ def telloGetFrame(drone, w=360, h=240):
     return img
 
 
-def trackFace(tello, info, w, pid, pError):
+def trackFace(tello, info, w=360, h=240) -> None:
     area = info[1]
     cx, cy = info[0]
     if area == 0 or cx == 0 or cy == 0:
-        speed = 0
-        error = 0
-        fb = 0
+        lr_v = 0
+        fb_v = 0
+        ud_v = 0
+        yaw_v = 0
     else:
-        error = cx - w // 2
-        speed = pid[0] * error + pid[1] * (error - pError)
-        speed = int(np.clip(speed, -100, 100))  # yaw
+        # left_right_velocity
+        error = cx - w / 2
+        lr_v = int(lr_pid.update(error))
+        lr_v = np.clip(lr_v, -20, 20)
 
-        if area > fbRange[1]:
-            fb = -20  # backward
-        elif area < fbRange[0] and area > 0:
-            fb = 20  # forward
-        else:
-            fb = 0  # stay
+        # forward_backward_velocity
+        error = area - w * h / 10
+        fb_v = int(fb_pid.update(error))
+        fb_v = np.clip(fb_v, -20, 20)
+        #print("fb", fb_v, "area", area, "error", error)
 
-    tello.send_rc_control(0, fb, 0, speed)
-    #print("fb", fb, "area", area)
-    return error
+        # up_down_velocity
+        error = cy - h / 2
+        ud_v = int(ud_pid.update(error))
+        ud_v = np.clip(ud_v, -20, 20)
+
+        # yaw_velocity
+        error = cx - w /2
+        yaw_v = int(yaw_pid.update(error))
+        yaw_v = np.clip(yaw_v, -20, 20)
+
+
+    tello.send_rc_control(lr_v, fb_v, ud_v, yaw_v)
+    #print("fb", fb_v, "area", area, "error", error)
 
 
 def findFace(img):
@@ -111,10 +132,14 @@ def putFPS(img, prev_time):
 
 tello = initTello()
 prev_time = time.time()
+fb_pid.reset()
+lr_pid.reset()
+ud_pid.reset()
+yaw_pid.reset()
 while True:
-    img = telloGetFrame(tello, w, h)
+    img = telloGetFrame(tello)
     img, info = findFace(img)
-    pError = trackFace(tello, info, w, pid, pError)
+    trackFace(tello, info)
     #print("center", info[0], "area", info[1])
     prev_time = putFPS(img, prev_time)
     cv2.imshow("alpha drone", img)
