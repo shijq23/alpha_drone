@@ -71,5 +71,5 @@ class PID(object):
 
         # sum the terms and return
         self.cV = sum([self.kP * self.cP, self.kI * self.cI, self.kD * self.cD])
-        self.LOGGER.debug(f"{self.cP} {self.cI} {self.cD} {self.cV}")
+        PID.LOGGER.debug(f"{self.cP} {self.cI} {self.cD} {self.cV}")
         return self.cV

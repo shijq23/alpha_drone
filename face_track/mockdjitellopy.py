@@ -1,4 +1,4 @@
-"""Library for interacting with DJI Ryze Tello drones.
+"""Mock library for interacting with DJI Ryze Tello drones.
 """
 
 # coding=utf-8
@@ -37,7 +37,7 @@ class Tello:
     FORMATTER = logging.Formatter('[%(levelname)s] %(filename)s - %(lineno)d - %(message)s')
     HANDLER.setFormatter(FORMATTER)
 
-    LOGGER = logging.getLogger('mockdjitellopy')
+    LOGGER = logging.getLogger('tello')
     LOGGER.addHandler(HANDLER)
     LOGGER.setLevel(logging.INFO)
     # Use Tello.LOGGER.setLevel(logging.<LEVEL>) in YOUR CODE
@@ -78,6 +78,14 @@ class Tello:
         """
         self.LOGGER.debug("Command '{}' sent".format(command))
         return True
+
+    def takeoff(self):
+        """Automatic takeoff.
+        """
+        # Something it takes a looooot of time to take off and return a succesful takeoff.
+        # So we better wait. Otherwise, it would give us an error on the following calls.
+        self.send_control_command("takeoff", timeout=Tello.TAKEOFF_TIMEOUT)
+        self.is_flying = True
 
     def land(self):
         """Automatic landing.
