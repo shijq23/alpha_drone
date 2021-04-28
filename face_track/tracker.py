@@ -28,12 +28,16 @@ class FaceTracker(object):
     cv2_base_dir = os.path.dirname(os.path.abspath(cv2.__file__))
     default_face = os.path.join(cv2_base_dir, "data",
                                 "haarcascade_frontalface_default.xml")
-    default_eyes = os.path.join(cv2_base_dir, "data",
-                                "haarcascade_eye_tree_eyeglasses.xml")
     face_cascade = cv2.CascadeClassifier(default_face)
-    eye_cascade = cv2.CascadeClassifier(default_eyes)
     if face_cascade.empty():
         LOGGER.warn(f"Error loading face cascade {default_face}")
+        exit(0)
+
+    default_eyes = os.path.join(cv2_base_dir, "data",
+                                 "haarcascade_eye_tree_eyeglasses.xml")
+    eye_cascade = cv2.CascadeClassifier(default_eyes)
+    if eye_cascade.empty():
+        LOGGER.warn(f"Error loading eye cascade {default_eyes}")
         exit(0)
 
     # mp_face_detection = mp.solutions.face_detection
@@ -139,11 +143,11 @@ class FaceTracker(object):
             faceListArea.append(area)
             cv2.circle(img, (cx, cy), 5, (0, 255, 0), cv2.FILLED)
 
-            # roi_gray = gray[y:y + h, x:x + w]
-            # roi_color = img[y:y + h, x:x + w]
-            # eyes = eye_cascade.detectMultiScale(roi_gray)
-            # for (ex, ey, ew, eh) in eyes:
-            #     cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
+            roi_gray = gray[y:y + h, x:x + w]
+            roi_color = img[y:y + h, x:x + w]
+            eyes = self.eye_cascade.detectMultiScale(roi_gray)
+            for (ex, ey, ew, eh) in eyes:
+                cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
 
         if len(faceListArea) != 0:
             i = faceListArea.index(max(faceListArea))
