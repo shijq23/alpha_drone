@@ -82,10 +82,12 @@ class FaceTracker(object):
         img = frame.frame
         img = cv2.resize(img, (self.w, self.h))
         return img
-
+    
     def trackFace(self, info) -> None:
         area = info[1]
         cx, cy = info[0]
+        def clip(x: int, lower:int=-100, upper:int=100) -> int:
+            return max(lower, min(upper, x))
         if area == 0 or cx == 0 or cy == 0:
             lr_v = 0
             fb_v = 0
@@ -95,23 +97,23 @@ class FaceTracker(object):
             # left_right_velocity
             error = cx - self.w / 2
             lr_v = int(self.lr_pid.update(error))
-            lr_v = np.clip(lr_v, -20, 20)
+            lr_v = clip(lr_v, -20, 20)
 
             # forward_backward_velocity
             error = area - self.w * self.h / 10
             fb_v = int(self.fb_pid.update(error))
-            fb_v = np.clip(fb_v, -20, 20)
+            fb_v = clip(fb_v, -20, 20)
             #print("fb", fb_v, "area", area, "error", error)
 
             # up_down_velocity
             error = cy - self.h / 2
             ud_v = int(self.ud_pid.update(error))
-            ud_v = np.clip(ud_v, -20, 20)
+            ud_v = clip(ud_v, -20, 20)
 
             # yaw_velocity
             error = cx - self.w / 2
             yaw_v = int(self.yaw_pid.update(error))
-            yaw_v = np.clip(yaw_v, -20, 20)
+            yaw_v = clip(yaw_v, -20, 20)
 
         self.drone.send_rc_control(lr_v, fb_v, ud_v, yaw_v)
         #print("fb", fb_v, "area", area, "error", error)
