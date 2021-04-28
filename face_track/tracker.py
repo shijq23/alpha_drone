@@ -197,9 +197,11 @@ class FaceTracker(object):
 
     def end(self) -> None:
         FaceTracker.LOGGER.info("end")
-        if self.drone:
+        try:
             self.drone.end()
-
+        except AttributeError:
+            pass
+    
     def __exit__(self, exc_type, exc_val, exc_tb):
         FaceTracker.LOGGER.info("exit")
         self.end()
