@@ -15,8 +15,9 @@ class PID(object):
     LOGGER.addHandler(HANDLER)
     LOGGER.setLevel(logging.INFO)
     
-    def __init__(self, kP:float=1.0, kI:float=0.0, kD:float=0.0) -> any:
+    def __init__(self, name:str='', kP:float=0.0, kI:float=0.0, kD:float=0.0) -> any:
         super().__init__()
+        self.name = name
         # initialize gains
         self.kP = kP
         self.kI = kI
@@ -71,5 +72,8 @@ class PID(object):
 
         # sum the terms and return
         self.cV = sum([self.kP * self.cP, self.kI * self.cI, self.kD * self.cD])
-        PID.LOGGER.debug(f"{self.cP} {self.cI} {self.cD} {self.cV}")
+        PID.LOGGER.debug(f"{self.name} {self.cP} {self.cI} {self.cD} {self.cV}")
         return self.cV
+    
+    def __str__(self) -> str:
+        return f"{self.name} {self.cP} {self.cI} {self.cD} {self.cV}"
