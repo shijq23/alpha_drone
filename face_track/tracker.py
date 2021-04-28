@@ -52,7 +52,7 @@ class FaceTracker(object):
     #Tello.LOGGER.setLevel(logging.DEBUG)
     #PID.LOGGER.setLevel(logging.DEBUG)
 
-    def __init__(self, w: int = 320, h: int = 240) -> any:
+    def __init__(self, w: int = 320, h: int = 240) -> None:
         super().__init__()
         self.drone = FaceTracker.initTello()
         self.prev_time = time.time()
@@ -141,7 +141,7 @@ class FaceTracker(object):
 
             faceListCenter.append([cx, cy])
             faceListArea.append(area)
-            cv2.circle(img, (cx, cy), 5, (0, 255, 0), cv2.FILLED)
+            cv2.circle(img, (cx, cy), 4, (0, 255, 0), cv2.FILLED)
 
             roi_gray = gray[y:y + h, x:x + w]
             roi_color = img[y:y + h, x:x + w]
