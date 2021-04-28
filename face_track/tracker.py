@@ -68,7 +68,7 @@ class FaceTracker(object):
 
     @staticmethod
     def initTello() -> Tello:
-        drone = Tello()
+        drone = Tello(retry_count=1)
         drone.connect()
         FaceTracker.LOGGER.info("battery {}".format(drone.get_battery()))
         drone.takeoff()
