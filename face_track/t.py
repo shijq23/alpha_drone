@@ -7,7 +7,7 @@ import time
 
 import cv2
 import numpy as np
-import mediapipe as mp
+# import mediapipe as mp
 
 from mockdjitellopy import Tello
 from pid import PID
@@ -32,9 +32,9 @@ if face_cascade.empty():
     LOGGER.warn(f"Error loading face cascade {default_face}")
     exit(0)
 
-mp_face_detection = mp.solutions.face_detection
-#mp_drawing = mp.solutions.drawing_utils
-face_detection = mp_face_detection.FaceDetection(min_detection_confidence=0.5)
+# mp_face_detection = mp.solutions.face_detection
+# #mp_drawing = mp.solutions.drawing_utils
+# face_detection = mp_face_detection.FaceDetection(min_detection_confidence=0.5)
 
 fbRange = [6200, 10000]  # forward backward measured in area
 udRange = [80, 160]  # up down measured in height
@@ -194,7 +194,7 @@ ud_pid.reset()
 yaw_pid.reset()
 while True:
     img = telloGetFrame(tello)
-    img, info = findFace_mp(img)
+    img, info = findFace(img)
     trackFace(tello, info)
     #print("center", info[0], "area", info[1])
     putFPS(img)
