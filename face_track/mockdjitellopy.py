@@ -188,7 +188,7 @@ class Tello:
     
 class BackgroundFrameRead:
     """
-    This class read frames from a VideoCapture in background. Use
+    Mock This class read frames from a VideoCapture in background. Use
     backgroundFrameRead.frame to get the current frame.
     """
 

@@ -9,7 +9,7 @@ import time
 import cv2
 import numpy as np
 
-from mockdjitellopy import Tello
+from djitellopy import Tello
 from pid import PID
 
 # import mediapipe as mp
@@ -24,6 +24,8 @@ class FaceTracker(object):
     LOGGER = logging.getLogger('alpha')
     LOGGER.addHandler(HANDLER)
     LOGGER.setLevel(logging.INFO)
+
+    MAX_COMMAND_SEC = 100 # throttle control, max number of commands per second
 
     cv2_base_dir = os.path.dirname(os.path.abspath(cv2.__file__))
     default_face = os.path.join(cv2_base_dir, "data",
@@ -54,32 +56,39 @@ class FaceTracker(object):
 
     def __init__(self, w: int = 320, h: int = 240) -> None:
         super().__init__()
-        self.drone = FaceTracker.initTello()
+
+        self.drone = FaceTracker.initTello() 
         self.prev_time = time.time()
         self.w = w
         self.h = h
 
-        self.fb_pid = PID('fb', kP=-0.07, kI=-0.00001, kD=0.001)
-        self.ud_pid = PID('ud', kP=0.7, kI=0.0001, kD=-0.001)
-        self.lr_pid = PID('lr', kP=0.7, kI=0.0001, kD=-0.001)
-        self.yaw_pid = PID('yaw', kP=0.7, kI=0.0001, kD=-0.001)
+        self.fb_pid = PID('fb', kP=0.07, kI=0.001, kD=0.01, SP=w * h / 10)
+        self.ud_pid = PID('ud', kP=-0.7, kI=-0.001, kD=0.01, SP= h /2)
+        self.lr_pid = PID('lr', kP=-0.07, kI=-0.0001, kD=0.001, SP=w / 2)
+        self.yaw_pid = PID('yaw', kP=-0.7, kI=-0.0001, kD=0.5, SP= w /2)
 
         self.fb_pid.reset()
         self.lr_pid.reset()
         self.ud_pid.reset()
         self.yaw_pid.reset()
+        self.fps = 0
+        self.track_count = 0
         atexit.register(self.end)
 
     @staticmethod
     def initTello() -> Tello:
-        drone = Tello(retry_count=1)
+        drone = Tello()
         drone.connect()
         FaceTracker.LOGGER.info("battery {}".format(drone.get_battery()))
-        drone.takeoff()
         drone.streamoff()
         drone.streamon()
-        #time.sleep(0.5)
+        drone.get_frame_read()
+        drone.takeoff()
         return drone
+
+    def _throttle(self):
+        self.track_count += 1
+        return self.fps <= FaceTracker.MAX_COMMAND_SEC or self.track_count * FaceTracker.MAX_COMMAND_SEC % self.fps == 0
 
     def readFrame(self):
         frame = self.drone.get_frame_read()
@@ -92,6 +101,10 @@ class FaceTracker(object):
         cx, cy = info[0]
         def clip(x: int, lower:int=-100, upper:int=100) -> int:
             return max(lower, min(upper, x))
+        # lr_v = 0  left -100, right 100
+        # fb_v = 0  backward -100, forward 100
+        # ud_v = 0  down -100, up 100
+        # yaw_v = 0 ccw -100, cw 100
         if area == 0 or cx == 0 or cy == 0:
             lr_v = 0
             fb_v = 0
@@ -99,27 +112,28 @@ class FaceTracker(object):
             yaw_v = 0
         else:
             # left_right_velocity
-            error = cx - self.w / 2
-            lr_v = int(self.lr_pid.update(error))
-            lr_v = clip(lr_v, -20, 20)
+            lr_v = int(self.lr_pid.update(cx))
+            lr_v = clip(lr_v, -10, 10)
+            lr_v =0
 
             # forward_backward_velocity
-            error = area - self.w * self.h / 10
-            fb_v = int(self.fb_pid.update(error))
+            fb_v = int(self.fb_pid.update(area))
             fb_v = clip(fb_v, -20, 20)
             #print("fb", fb_v, "area", area, "error", error)
 
             # up_down_velocity
-            error = cy - self.h / 2
-            ud_v = int(self.ud_pid.update(error))
-            ud_v = clip(ud_v, -20, 20)
+            ud_v = int(self.ud_pid.update(cy))
+            ud_v = clip(ud_v, -10, 10)
+            ud_v = 0
 
             # yaw_velocity
-            error = cx - self.w / 2
-            yaw_v = int(self.yaw_pid.update(error))
-            yaw_v = clip(yaw_v, -20, 20)
-
-        self.drone.send_rc_control(lr_v, fb_v, ud_v, yaw_v)
+            yaw_v = int(self.yaw_pid.update(cx))
+            yaw_v = clip(yaw_v, -30, 30)
+            #yaw_v = 0
+        
+        if self._throttle():
+            self.drone.send_rc_control(lr_v, fb_v, ud_v, yaw_v)
+            FaceTracker.LOGGER.info(f"{lr_v:>3d} {fb_v:>3d} {ud_v:>3d} {yaw_v:>3d}")
         #print("fb", fb_v, "area", area, "error", error)
 
     def findFace(self, img):
@@ -196,8 +210,15 @@ class FaceTracker(object):
         fps = 1.0 / (cur_time - self.prev_time)
         fps = int(fps)
         self.prev_time = cur_time
-        cv2.putText(img, f"FPS: {fps}", (7, 30), cv2.FONT_HERSHEY_SIMPLEX, 1,
+        self.fps = fps
+        cv2.putText(img, f"FPS: {fps}", (7, 30), cv2.FONT_HERSHEY_PLAIN, 1,
                     (100, 255, 0), 1, cv2.LINE_AA)
+    
+    def putBattery(self, img) -> None:
+        ih, iw, ic = img.shape
+        cv2.putText(img, f"BAT: {self.drone.get_battery()}%", (iw-90, 30), cv2.FONT_HERSHEY_PLAIN, 1,
+                    (100, 255, 0), 1, cv2.LINE_AA)
+    
 
     def end(self) -> None:
         FaceTracker.LOGGER.info("end")
@@ -227,6 +248,7 @@ def main():
         alpha.trackFace(info)
         #print("center", info[0], "area", info[1])
         alpha.putFPS(img)
+        alpha.putBattery(img)
         cv2.imshow("alpha drone", img)
         if cv2.waitKey(1) != -1:
             break
