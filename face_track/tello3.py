@@ -51,10 +51,7 @@ while True:
         python_version = str(platform.python_version())
         version_init_num = int(python_version.partition('.')[0])
         # print (version_init_num)
-        if version_init_num == 3:
-            msg = input("")
-        elif version_init_num == 2:
-            msg = raw_input("")
+        msg = input("")
 
         if not msg:
             break
