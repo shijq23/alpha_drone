@@ -3,13 +3,14 @@
 
 import atexit
 import logging
+import math
 import os
 import time
 
 import cv2
 import numpy as np
 
-from djitellopy import Tello
+from mockdjitellopy import Tello
 from pid import PID
 
 # import mediapipe as mp
@@ -25,7 +26,7 @@ class FaceTracker(object):
     LOGGER.addHandler(HANDLER)
     LOGGER.setLevel(logging.INFO)
 
-    MAX_COMMAND_SEC = 100 # throttle control, max number of commands per second
+    MAX_COMMAND_SEC = 100  # throttle control, max number of commands per second
 
     cv2_base_dir = os.path.dirname(os.path.abspath(cv2.__file__))
     default_face = os.path.join(cv2_base_dir, "data",
@@ -36,7 +37,7 @@ class FaceTracker(object):
         exit(0)
 
     default_eyes = os.path.join(cv2_base_dir, "data",
-                                 "haarcascade_eye_tree_eyeglasses.xml")
+                                "haarcascade_eye_tree_eyeglasses.xml")
     eye_cascade = cv2.CascadeClassifier(default_eyes)
     if eye_cascade.empty():
         LOGGER.warn(f"Error loading eye cascade {default_eyes}")
@@ -57,15 +58,19 @@ class FaceTracker(object):
     def __init__(self, w: int = 320, h: int = 240) -> None:
         super().__init__()
 
-        self.drone = FaceTracker.initTello() 
+        self.drone = FaceTracker.initTello()
         self.prev_time = time.time()
         self.w = w
         self.h = h
 
-        self.fb_pid = PID('fb', kP=0.07, kI=0.001, kD=0.01, SP=w * h / 10)
-        self.ud_pid = PID('ud', kP=-0.7, kI=-0.001, kD=0.01, SP= h /2)
-        self.lr_pid = PID('lr', kP=-0.07, kI=-0.0001, kD=0.001, SP=w / 2)
-        self.yaw_pid = PID('yaw', kP=-0.7, kI=-0.0001, kD=0.5, SP= w /2)
+        self.fb_pid = PID('fb',
+                          kP=0.7,
+                          kI=0.0,
+                          kD=-0.1,
+                          SP=math.sqrt(w * h / 10))
+        self.ud_pid = PID('ud', kP=-0.7, kI=-0.0, kD=0.1, SP=h / 2)
+        self.lr_pid = PID('lr', kP=-0.07, kI=-0.0, kD=0.01, SP=w / 2)
+        self.yaw_pid = PID('yaw', kP=-0.7, kI=-0.0, kD=0.5, SP=w / 2)
 
         self.fb_pid.reset()
         self.lr_pid.reset()
@@ -95,12 +100,14 @@ class FaceTracker(object):
         img = frame.frame
         img = cv2.resize(img, (self.w, self.h))
         return img
-    
+
     def trackFace(self, info) -> None:
         area = info[1]
         cx, cy = info[0]
-        def clip(x: int, lower:int=-100, upper:int=100) -> int:
+
+        def clip(x: int, lower: int = -100, upper: int = 100) -> int:
             return max(lower, min(upper, x))
+
         # lr_v = 0  left -100, right 100
         # fb_v = 0  backward -100, forward 100
         # ud_v = 0  down -100, up 100
@@ -113,27 +120,29 @@ class FaceTracker(object):
         else:
             # left_right_velocity
             lr_v = int(self.lr_pid.update(cx))
-            lr_v = clip(lr_v, -10, 10)
-            lr_v =0
+            lr_v = clip(lr_v, -5, 5)
+            #lr_v = 0
 
             # forward_backward_velocity
-            fb_v = int(self.fb_pid.update(area))
+            pv = math.sqrt(area)
+            fb_v = int(self.fb_pid.update(pv))
             fb_v = clip(fb_v, -20, 20)
-            #print("fb", fb_v, "area", area, "error", error)
+            # fb_v = 0
 
             # up_down_velocity
             ud_v = int(self.ud_pid.update(cy))
-            ud_v = clip(ud_v, -10, 10)
-            ud_v = 0
+            ud_v = clip(ud_v, -5, 5)
+            # ud_v = 0
 
             # yaw_velocity
             yaw_v = int(self.yaw_pid.update(cx))
             yaw_v = clip(yaw_v, -30, 30)
             #yaw_v = 0
-        
+
         if self._throttle():
             self.drone.send_rc_control(lr_v, fb_v, ud_v, yaw_v)
-            FaceTracker.LOGGER.info(f"{lr_v:>3d} {fb_v:>3d} {ud_v:>3d} {yaw_v:>3d}")
+            FaceTracker.LOGGER.info(
+                f"{lr_v:>3d} {fb_v:>3d} {ud_v:>3d} {yaw_v:>3d}")
         #print("fb", fb_v, "area", area, "error", error)
 
     def findFace(self, img):
@@ -161,7 +170,8 @@ class FaceTracker(object):
             roi_color = img[y:y + h, x:x + w]
             eyes = self.eye_cascade.detectMultiScale(roi_gray)
             for (ex, ey, ew, eh) in eyes:
-                cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
+                cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh),
+                              (0, 255, 0), 2)
 
         if len(faceListArea) != 0:
             i = faceListArea.index(max(faceListArea))
@@ -213,12 +223,11 @@ class FaceTracker(object):
         self.fps = fps
         cv2.putText(img, f"FPS: {fps}", (7, 30), cv2.FONT_HERSHEY_PLAIN, 1,
                     (100, 255, 0), 1, cv2.LINE_AA)
-    
+
     def putBattery(self, img) -> None:
         ih, iw, ic = img.shape
-        cv2.putText(img, f"BAT: {self.drone.get_battery()}%", (iw-90, 30), cv2.FONT_HERSHEY_PLAIN, 1,
-                    (100, 255, 0), 1, cv2.LINE_AA)
-    
+        cv2.putText(img, f"BAT: {self.drone.get_battery()}%", (iw - 90, 30),
+                    cv2.FONT_HERSHEY_PLAIN, 1, (100, 255, 0), 1, cv2.LINE_AA)
 
     def end(self) -> None:
         FaceTracker.LOGGER.info("end")
@@ -226,7 +235,7 @@ class FaceTracker(object):
             self.drone.end()
         except AttributeError:
             pass
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         FaceTracker.LOGGER.info("exit")
         self.end()

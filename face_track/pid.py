@@ -71,7 +71,7 @@ class PID(object):
         # grab the current time and calculate delta time
         self.currTime = time.time()
         deltaTime = self.currTime - self.prevTime
-        deltaTime = .05 # fixed 20 fps
+        deltaTime = 1.0
         # if deltaTime < PID.EPSILON:
         #     return self.cV
         error = self.SP - pv
