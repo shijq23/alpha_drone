@@ -84,6 +84,7 @@ class FaceTracker(object):
         drone.streamon()
         drone.get_frame_read()
         drone.takeoff()
+        drone.move_up(50)
         return drone
 
     def _throttle(self):
@@ -131,7 +132,7 @@ class FaceTracker(object):
 
             # yaw_velocity
             yaw_v = int(self.yaw_pid.update(cx))
-            yaw_v = clip(yaw_v, -30, 30)
+            yaw_v = clip(yaw_v, -20, 20)
             #yaw_v = 0
 
         if self._throttle():

@@ -185,7 +185,22 @@ class Tello:
             )
         #self.send_command_without_return(cmd)
         self.send_control_command(cmd)
-    
+
+    def move(self, direction: str, x: int):
+        """Tello fly up, down, left, right, forward or back with distance x cm.
+        Users would normally call one of the move_x functions instead.
+        Arguments:
+            direction: up, down, left, right, forward or back
+            x: 20-500
+        """
+        self.send_control_command("{} {}".format(direction, x))
+
+    def move_up(self, x: int):
+        """Fly x cm up.
+        Arguments:
+            x: 20-500
+        """
+        self.move("up", x)
 class BackgroundFrameRead:
     """
     Mock This class read frames from a VideoCapture in background. Use
