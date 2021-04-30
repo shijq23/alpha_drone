@@ -47,11 +47,6 @@ class FaceTracker(object):
     # #mp_drawing = mp.solutions.drawing_utils
     # face_detection = mp_face_detection.FaceDetection(min_detection_confidence=0.5)
 
-    fbRange = [6200, 10000]  # forward backward measured in area
-    udRange = [80, 160]  # up down measured in height
-    lrRange = [110, 220]  # lef right measured in width
-    yawRange = [110, 220]  # yaw measued in width
-
     #Tello.LOGGER.setLevel(logging.DEBUG)
     #PID.LOGGER.setLevel(logging.DEBUG)
 
