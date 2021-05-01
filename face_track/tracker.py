@@ -229,8 +229,10 @@ class FaceTracker(object):
 
     def putBattery(self, img) -> None:
         ih, iw, ic = img.shape
-        cv2.putText(img, f"BAT: {self.drone.get_battery()}%", (iw - 90, 30),
-                    cv2.FONT_HERSHEY_PLAIN, 1, (100, 255, 0), 1, cv2.LINE_AA)
+        battery = self.drone.get_battery()
+        color = (100, 255, 0) if battery > 20 else (100, 0, 255)
+        cv2.putText(img, f"BAT: {battery}%", (iw - 90, 30),
+                    cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
 
     def end(self) -> None:
         FaceTracker.LOGGER.info("end")
