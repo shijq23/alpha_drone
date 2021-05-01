@@ -28,6 +28,7 @@ class FaceTracker(object):
     LOGGER.setLevel(logging.INFO)
 
     MAX_COMMAND_SEC: int = 100  # throttle control, max number of commands per second
+    OVERRIDE_PERIOD: float = 0.1  # key press override period in seconds
 
     cv2_base_dir = os.path.dirname(os.path.abspath(cv2.__file__))
     default_face = os.path.join(cv2_base_dir, "data",
@@ -79,6 +80,7 @@ class FaceTracker(object):
         self.lr_override: int = 0
         self.ud_override: int = 0
         self.yaw_override: int = 0
+        self.override_time: float = 0.0
 
         atexit.register(self.end)
 
@@ -122,15 +124,11 @@ class FaceTracker(object):
         # fb_v = 0  backward -100, forward 100
         # ud_v = 0  down -100, up 100
         # yaw_v = 0 ccw -100, cw 100
-        if self.lr_override or self.fb_override or self.ud_override or self.yaw_override:
+        if time.time() - self.override_time < FaceTracker.OVERRIDE_PERIOD:
             lr_v = self.lr_override
             fb_v = self.fb_override
             ud_v = self.ud_override
             yaw_v = self.yaw_override
-            self.lr_override = 0
-            self.fb_override = 0
-            self.ud_override = 0
-            self.yaw_override = 0
         elif area == 0 or cx == 0 or cy == 0:
             lr_v = 0
             fb_v = 0
@@ -275,14 +273,19 @@ request_run: bool = True
 
 def on_press(key) -> None:
     global request_run
+    on_press.alpha.override_time = time.time()
     if key == keyboard.Key.up:
         on_press.alpha.fb_override = 20
+        on_press.alpha.lr_override = 0
     elif key == keyboard.Key.down:
         on_press.alpha.fb_override = -20
+        on_press.alpha.lr_override = 0
     elif key == keyboard.Key.left:
         on_press.alpha.lr_override = -20
+        on_press.alpha.fb_override = 0
     elif key == keyboard.Key.right:
         on_press.alpha.lr_override = 20
+        on_press.alpha.fb_override = 0
     else:
         request_run = False
 
