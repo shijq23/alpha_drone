@@ -61,10 +61,10 @@ class FaceTracker(object):
         self.fb_pid = PID('fb',
                           kP=0.7,
                           kI=0.0,
-                          kD=-0.1,
+                          kD=-0.5,
                           SP=math.sqrt(w * h / 10))
-        self.ud_pid = PID('ud', kP=0.7, kI=-0.0, kD=0.1, SP=h / 2)
-        self.lr_pid = PID('lr', kP=-0.7, kI=-0.0, kD=0.1, SP=w / 2)
+        self.ud_pid = PID('ud', kP=0.7, kI=-0.0, kD=-0.5, SP=h / 2)
+        self.lr_pid = PID('lr', kP=-0.7, kI=-0.0, kD=0.5, SP=w / 2)
         self.yaw_pid = PID('yaw', kP=-0.7, kI=-0.0, kD=0.5, SP=w / 2)
 
         self.fb_pid.reset()
@@ -124,7 +124,7 @@ class FaceTracker(object):
             # left_right_velocity
             lr_v = int(self.lr_pid.update(cx))
             lr_v = clip(lr_v, -5, 5)
-            lr_v = 0
+            # lr_v = 0
 
             # forward_backward_velocity
             pv = math.sqrt(area)
@@ -144,7 +144,7 @@ class FaceTracker(object):
 
         #if self._throttle():
         self.drone.send_rc_control(lr_v, fb_v, ud_v, yaw_v)
-        FaceTracker.LOGGER.info(
+        FaceTracker.LOGGER.debug(
             f"{lr_v:>3d} {fb_v:>3d} {ud_v:>3d} {yaw_v:>3d}")
         #print("fb", fb_v, "area", area, "error", error)
 
