@@ -227,11 +227,16 @@ bitbake-layers add-layer ../layers/meta-browser/
 bitbake-layers add-layer ../layers/meta-clang/
 ```
 
+## Reference local conf files
+
+* [local.conf](./local.conf)
+* [bblayers.conf](./bblayers.conf)
+
 ## Credits
 
 This script has been adapted from following projects and tutorials.
 
 * [NVIDIA container runtime for Wind River Linux](https://blogs.windriver.com/wind_river_blog/2020/05/nvidia-container-runtime-for-wind-river-linux/)
-* [I Forced a Drone Bot To Follow Me](https://www.youtube.com/watch?v=4KiH3Fq3olM)
-* [Drone Face Tracking PID using OpenCV Pyhton](https://www.youtube.com/watch?v=P2wl3N2JW9c)
-* [First DJI Tello drone face tracking test with openCV](https://www.youtube.com/watch?v=WFz5I1iRhLY)
+* [Binary Images Optimized for Your Embedded Device](https://blogs.windriver.com/wind_river_blog/2020/09/binary-images-optimized-for-your-embedded-device/)
+* [Yocto Support for NVIDIA Jetson Platforms - Setting up Yocto](https://developer.ridgerun.com/wiki/index.php?title=Yocto_Support_for_NVIDIA_Jetson_Platforms_-_Setting_up_Yocto)
+* [Building a BSP Layer: An overview of meta-tegra by Matt Madison](https://www.youtube.com/watch?v=OItxVui7s-U)
