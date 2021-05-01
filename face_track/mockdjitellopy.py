@@ -8,7 +8,8 @@ import time
 from threading import Thread
 from typing import Optional, Union, Type, Dict
 
-import cv2 # type: ignore
+import cv2  # type: ignore
+
 
 class Tello:
     """Mock Python wrapper to interact with the Ryze Tello drone using the official Tello api.
@@ -25,7 +26,7 @@ class Tello:
     RETRY_COUNT = 3  # number of retries after a failed command
     TELLO_IP = '192.168.10.1'  # Tello IP address
 
-        # Video stream, server socket
+    # Video stream, server socket
     VS_UDP_IP = '0.0.0.0'
     VS_UDP_PORT = 11111
 
@@ -34,7 +35,8 @@ class Tello:
 
     # Set up logger
     HANDLER = logging.StreamHandler()
-    FORMATTER = logging.Formatter('[%(levelname)s] %(filename)s - %(lineno)d - %(message)s')
+    FORMATTER = logging.Formatter(
+        '[%(levelname)s] %(filename)s - %(lineno)d - %(message)s')
     HANDLER.setFormatter(FORMATTER)
 
     LOGGER = logging.getLogger('tello')
@@ -50,16 +52,14 @@ class Tello:
     stream_on = False
     is_flying = False
 
+    def __init__(self, host=TELLO_IP, retry_count=RETRY_COUNT):
+        self.host = host
+        self.retry_count = retry_count
+        self.stream_on = False
+        self.battery = 70
+        self.temph = 46
+        self.last_rc_control_timestamp = time.time()
 
-    def __init__(self,
-                host=TELLO_IP,
-                retry_count=RETRY_COUNT):
-            self.host = host
-            self.retry_count = retry_count
-            self.stream_on = False
-            self.battery = 70
-            self.last_rc_control_timestamp = time.time()
-    
     def connect(self, wait_for_state=True):
         """Enter SDK mode. Call this before any of the control functions.
         """
@@ -72,7 +72,16 @@ class Tello:
         """
         return self.battery
 
-    def send_control_command(self, command: str, timeout: int = RESPONSE_TIMEOUT) -> bool:
+    def get_highest_temperature(self) -> int:
+        """Get highest temperature
+        Returns:
+            float: highest temperature (°C)
+        """
+        return self.temph
+
+    def send_control_command(self,
+                             command: str,
+                             timeout: int = RESPONSE_TIMEOUT) -> bool:
         """Send control command to Tello and wait for its response.
         Internal method, you normally wouldn't call this yourself.
         """
@@ -112,7 +121,7 @@ class Tello:
         """
         self.send_control_command("streamoff")
         self.stream_on = False
-    
+
     def get_frame_read(self) -> 'BackgroundFrameRead':
         """Get the BackgroundFrameRead object from the camera drone. Then, you just need to call
         backgroundFrameRead.frame to get the actual frame received by the drone.
@@ -120,11 +129,12 @@ class Tello:
             BackgroundFrameRead
         """
         if self.background_frame_read is None:
-            address = 0 #self.get_udp_video_address()
-            self.background_frame_read = BackgroundFrameRead(self, address)  # also sets self.cap
+            address = 0  #self.get_udp_video_address()
+            self.background_frame_read = BackgroundFrameRead(
+                self, address)  # also sets self.cap
             self.background_frame_read.start()
         return self.background_frame_read
-    
+
     def get_udp_video_address(self) -> str:
         """Internal method, you normally wouldn't call this youself.
         """
@@ -147,7 +157,7 @@ class Tello:
             self.cap.open(self.get_udp_video_address())
 
         return self.cap
-    
+
     def end(self):
         """Call this method when you want to end the tello object
         """
@@ -159,11 +169,12 @@ class Tello:
             self.background_frame_read.stop()
         if self.cap is not None:
             self.cap.release()
-    
+
     def __del__(self):
         self.end()
-    
-    def send_rc_control(self, left_right_velocity: int, forward_backward_velocity: int, up_down_velocity: int,
+
+    def send_rc_control(self, left_right_velocity: int,
+                        forward_backward_velocity: int, up_down_velocity: int,
                         yaw_velocity: int):
         """Send RC control via four channels. Command is sent every self.TIME_BTW_RC_CONTROL_COMMANDS seconds.
         Arguments:
@@ -175,14 +186,13 @@ class Tello:
         def clamp100(x: int) -> int:
             return max(-100, min(100, x))
 
-        if time.time() - self.last_rc_control_timestamp > self.TIME_BTW_RC_CONTROL_COMMANDS:
+        if time.time(
+        ) - self.last_rc_control_timestamp > self.TIME_BTW_RC_CONTROL_COMMANDS:
             self.last_rc_control_timestamp = time.time()
-            cmd = 'rc {} {} {} {}'.format(
-                clamp100(left_right_velocity),
-                clamp100(forward_backward_velocity),
-                clamp100(up_down_velocity),
-                clamp100(yaw_velocity)
-            )
+            cmd = 'rc {} {} {} {}'.format(clamp100(left_right_velocity),
+                                          clamp100(forward_backward_velocity),
+                                          clamp100(up_down_velocity),
+                                          clamp100(yaw_velocity))
         #self.send_command_without_return(cmd)
         self.send_control_command(cmd)
 
@@ -201,12 +211,13 @@ class Tello:
             x: 20-500
         """
         self.move("up", x)
+
+
 class BackgroundFrameRead:
     """
     Mock This class read frames from a VideoCapture in background. Use
     backgroundFrameRead.frame to get the current frame.
     """
-
     def __init__(self, tello, address):
         tello.cap = cv2.VideoCapture(address)
 

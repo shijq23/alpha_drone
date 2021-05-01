@@ -84,8 +84,9 @@ class FaceTracker(object):
     def initTello() -> Tello:
         drone = Tello(retry_count=1)
         drone.connect()
-
         FaceTracker.LOGGER.info("battery {}".format(drone.get_battery()))
+        FaceTracker.LOGGER.info("temperature {}".format(
+            drone.get_highest_temperature()))
         drone.streamoff()
         drone.streamon()
         drone.get_frame_read()
@@ -244,6 +245,13 @@ class FaceTracker(object):
         cv2.putText(img, f"BAT: {battery}%", (iw - 90, 30),
                     cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
 
+    def putTemperature(self, img) -> None:
+        ih, iw, ic = img.shape
+        temp = self.drone.get_highest_temperature()
+        color = (100, 255, 0) if temp < 70 else (100, 0, 255)
+        cv2.putText(img, f"TEMP: {temp}", (iw // 2 - 40, 30),
+                    cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
+
     def end(self) -> None:
         FaceTracker.LOGGER.info("end")
         try:
@@ -276,6 +284,7 @@ def main():
         #print("center", info[0], "area", info[1])
         alpha.putFPS(img)
         alpha.putBattery(img)
+        alpha.putTemperature(img)
         cv2.imshow("alpha drone", img)
         if cv2.waitKey(1) != -1:
             break
