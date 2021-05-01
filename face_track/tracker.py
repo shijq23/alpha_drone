@@ -8,7 +8,7 @@ import os
 import time
 
 import cv2
-import keyboard
+from pynput import keyboard
 import numpy as np
 
 from mockdjitellopy import Tello
@@ -273,28 +273,30 @@ class FaceTracker(object):
 request_run: bool = True
 
 
-def kbdCallback(e) -> None:
+def on_press(key) -> None:
     global request_run
-    #print(e.name)
-    if e.name == "up":
-        kbdCallback.alpha.fb_override = 20
-    elif e.name == "down":
-        kbdCallback.alpha.fb_override = -20
-    elif e.name == "left":
-        kbdCallback.alpha.lr_override = -20
-    elif e.name == "right":
-        kbdCallback.alpha.lr_override = 20
+    if key == keyboard.Key.up:
+        on_press.alpha.fb_override = 20
+    elif key == keyboard.Key.down:
+        on_press.alpha.fb_override = -20
+    elif key == keyboard.Key.left:
+        on_press.alpha.lr_override = -20
+    elif key == keyboard.Key.right:
+        on_press.alpha.lr_override = 20
     else:
         request_run = False
 
 
-kbdCallback.alpha = {}
+on_press.alpha = None
 
 
 def main():
     alpha = FaceTracker()
-    kbdCallback.alpha = alpha
-    keyboard.on_press(kbdCallback)
+    on_press.alpha = alpha
+
+    #listen to keyboard
+    listener = keyboard.Listener(on_press=on_press)
+    listener.start()
 
     while request_run:
         img = alpha.readFrame()
@@ -307,6 +309,7 @@ def main():
         cv2.waitKey(1)
 
     #cap.release()
+    listener.stop()
     cv2.destroyAllWindows()
     alpha.end()
 
