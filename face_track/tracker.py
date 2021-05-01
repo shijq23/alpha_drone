@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import atexit
 import logging
 import math
 import os
 import time
 
 import cv2
-from pynput import keyboard
 import numpy as np
 
 from mockdjitellopy import Tello
@@ -81,8 +79,6 @@ class FaceTracker(object):
         self.ud_override: int = 0
         self.yaw_override: int = 0
         self.override_time: float = 0.0
-
-        atexit.register(self.end)
 
     @staticmethod
     def initTello() -> Tello:
@@ -271,36 +267,8 @@ class FaceTracker(object):
 request_run: bool = True
 
 
-def on_press(key) -> None:
-    global request_run
-    on_press.alpha.override_time = time.time()
-    if key == keyboard.Key.up:
-        on_press.alpha.fb_override = 20
-        on_press.alpha.lr_override = 0
-    elif key == keyboard.Key.down:
-        on_press.alpha.fb_override = -20
-        on_press.alpha.lr_override = 0
-    elif key == keyboard.Key.left:
-        on_press.alpha.lr_override = -20
-        on_press.alpha.fb_override = 0
-    elif key == keyboard.Key.right:
-        on_press.alpha.lr_override = 20
-        on_press.alpha.fb_override = 0
-    else:
-        request_run = False
-
-
-on_press.alpha = None
-
-
 def main():
     alpha = FaceTracker()
-    on_press.alpha = alpha
-
-    #listen to keyboard
-    listener = keyboard.Listener(on_press=on_press)
-    listener.start()
-
     while request_run:
         img = alpha.readFrame()
         img, info = alpha.findFace(img)
@@ -309,10 +277,10 @@ def main():
         alpha.putFPS(img)
         alpha.putBattery(img)
         cv2.imshow("alpha drone", img)
-        cv2.waitKey(1)
+        if cv2.waitKey(1) != -1:
+            break
 
     #cap.release()
-    listener.stop()
     cv2.destroyAllWindows()
     alpha.end()
 
