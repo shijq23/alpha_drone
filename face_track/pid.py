@@ -17,6 +17,7 @@ class PID(object):
     LOGGER = logging.getLogger('pid')
     LOGGER.addHandler(HANDLER)
     LOGGER.setLevel(logging.INFO)
+    DECAY_CONSTANT: float = 0.6  # how much the previous cv value decays
 
     def __init__(self,
                  name: str = '',
@@ -92,10 +93,12 @@ class PID(object):
         self.prevError = error
 
         # sum the terms and return
-        self.cV = sum(
-            [self.kP * self.cP, self.kI * self.cI, self.kD * self.cD])
+        cV = sum([self.kP * self.cP, self.kI * self.cI, self.kD * self.cD])
+        self.cV = self.cV * PID.DECAY_CONSTANT + (1.0 -
+                                                  PID.DECAY_CONSTANT) * cV
         PID.LOGGER.debug(
-            f"{self.name} {self.cP} {self.cI} {self.cD} {self.cV}")
+            f"{self.name} {self.cP} {self.cI} {self.cD} {cV} {self.cV}")
+
         return self.cV
 
     def __str__(self) -> str:
