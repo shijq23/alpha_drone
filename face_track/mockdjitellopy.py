@@ -3,10 +3,11 @@
 
 # coding=utf-8
 import logging
+import random
 import socket
 import time
 from threading import Thread
-from typing import Optional, Union, Type, Dict
+from typing import Dict, Optional, Type, Union
 
 import cv2  # type: ignore
 
@@ -78,6 +79,34 @@ class Tello:
             float: highest temperature (°C)
         """
         return self.temph
+
+    def get_speed_x(self) -> int:
+        """X-Axis Speed
+        Returns:
+            int: speed
+        """
+        return random.randrange(0, 101)
+
+    def get_speed_y(self) -> int:
+        """Y-Axis Speed
+        Returns:
+            int: speed
+        """
+        return random.randrange(0, 101)
+
+    def get_distance_tof(self) -> int:
+        """Get current distance value from TOF in cm
+        Returns:
+            int: TOF distance in cm
+        """
+        return random.randrange(0, 191)
+
+    def get_speed_z(self) -> int:
+        """Z-Axis Speed
+        Returns:
+            int: speed
+        """
+        return random.randrange(0, 101)
 
     def send_control_command(self,
                              command: str,

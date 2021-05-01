@@ -238,6 +238,18 @@ class FaceTracker(object):
         cv2.putText(img, f"FPS: {fps}", (7, 30), cv2.FONT_HERSHEY_PLAIN, 1,
                     (100, 255, 0), 1, cv2.LINE_AA)
 
+    def putFlight(self, img) -> None:
+        ih, iw, ic = img.shape
+        color = (100, 255, 0)
+        cv2.putText(img, f"x: {self.drone.get_speed_x()}", (7, 30 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
+                    (100, 255, 0), 1, cv2.LINE_AA)
+        cv2.putText(img, f"y: {self.drone.get_speed_y()}", (7, 30 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
+                    (100, 255, 0), 1, cv2.LINE_AA)
+        cv2.putText(img, f"z: {self.drone.get_speed_z()}", (7, 30 + 22 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
+                    (100, 255, 0), 1, cv2.LINE_AA)
+        cv2.putText(img, f"h: {self.drone.get_distance_tof()}", (7, 30 + 22 + 22 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
+                    (100, 255, 0), 1, cv2.LINE_AA)
+
     def putBattery(self, img) -> None:
         ih, iw, ic = img.shape
         battery = self.drone.get_battery()
@@ -285,6 +297,7 @@ def main():
         alpha.putFPS(img)
         alpha.putBattery(img)
         alpha.putTemperature(img)
+        alpha.putFlight(img)
         cv2.imshow("alpha drone", img)
         if cv2.waitKey(1) != -1:
             break
