@@ -8,6 +8,7 @@ import os
 import time
 
 import cv2
+import keyboard
 import numpy as np
 
 from mockdjitellopy import Tello
@@ -55,8 +56,8 @@ class FaceTracker(object):
 
         self.drone = FaceTracker.initTello()
         self.prev_time = time.time()
-        self.w = w
-        self.h = h
+        self.w: int = w
+        self.h: int = h
 
         self.fb_pid = PID('fb',
                           kP=0.7,
@@ -71,8 +72,14 @@ class FaceTracker(object):
         self.lr_pid.reset()
         self.ud_pid.reset()
         self.yaw_pid.reset()
-        self.fps = 0
-        self.track_count = 0
+        self.fps: int = 0
+        self.track_count: int = 0
+
+        self.fb_override: int = 0
+        self.lr_override: int = 0
+        self.ud_override: int = 0
+        self.yaw_override: int = 0
+
         atexit.register(self.end)
 
     @staticmethod
@@ -115,7 +122,16 @@ class FaceTracker(object):
         # fb_v = 0  backward -100, forward 100
         # ud_v = 0  down -100, up 100
         # yaw_v = 0 ccw -100, cw 100
-        if area == 0 or cx == 0 or cy == 0:
+        if self.lr_override or self.fb_override or self.ud_override or self.yaw_override:
+            lr_v = self.lr_override
+            fb_v = self.fb_override
+            ud_v = self.ud_override
+            yaw_v = self.yaw_override
+            self.lr_override = 0
+            self.fb_override = 0
+            self.ud_override = 0
+            self.yaw_override = 0
+        elif area == 0 or cx == 0 or cy == 0:
             lr_v = 0
             fb_v = 0
             ud_v = 0
@@ -254,9 +270,33 @@ class FaceTracker(object):
             pass
 
 
+request_run: bool = True
+
+
+def kbdCallback(e) -> None:
+    global request_run
+    #print(e.name)
+    if e.name == "up":
+        kbdCallback.alpha.fb_override = 20
+    elif e.name == "down":
+        kbdCallback.alpha.fb_override = -20
+    elif e.name == "left":
+        kbdCallback.alpha.lr_override = -20
+    elif e.name == "right":
+        kbdCallback.alpha.lr_override = 20
+    else:
+        request_run = False
+
+
+kbdCallback.alpha = {}
+
+
 def main():
     alpha = FaceTracker()
-    while True:
+    kbdCallback.alpha = alpha
+    keyboard.on_press(kbdCallback)
+
+    while request_run:
         img = alpha.readFrame()
         img, info = alpha.findFace(img)
         alpha.trackFace(info)
@@ -264,8 +304,7 @@ def main():
         alpha.putFPS(img)
         alpha.putBattery(img)
         cv2.imshow("alpha drone", img)
-        if cv2.waitKey(1) != -1:
-            break
+        cv2.waitKey(1)
 
     #cap.release()
     cv2.destroyAllWindows()
