@@ -306,12 +306,9 @@ class FaceTracker(object):
             return
 
         def uniq_filename() -> str:
-            fn = str(datetime.datetime.now().date()) + '_' + str(
-                datetime.datetime.now().time())
-            fn = fn.replace(':', '').replace('.', '').replace('-', '')
+            fn = f"vid-{datetime.datetime.now().strftime('%Y%m%d_%I%M%S')}.avi"
             return fn
-
-        fn = 'vid-' + uniq_filename() + '.avi'
+        fn = uniq_filename()
         self.keepRecording = True
         self.video = cv2.VideoWriter(fn, cv2.VideoWriter_fourcc(*'XVID'),
                                      FaceTracker.RECORD_FRAME_RATE,
