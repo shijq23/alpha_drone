@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import logging
@@ -9,7 +8,7 @@ import time
 import cv2
 import numpy as np
 
-from face_track.mockdjitellopy import Tello
+from face_track.djitellopy import Tello
 #from djitellopy import Tello
 from face_track.pid import PID
 
@@ -52,12 +51,17 @@ class FaceTracker(object):
     #PID.LOGGER.setLevel(logging.DEBUG)
 
     def __init__(self, w: int = 320, h: int = 240) -> None:
+        """Initialize a FaceTracker instance
+        :param w: the image width in pixel (x)
+        :param h: the image height in pizel (y)
+        :return: None
+        """
         super().__init__()
 
         self.drone = FaceTracker.initTello()
         self.prev_time = time.time()
-        self.w: int = w
-        self.h: int = h
+        self.w: int = w  # image width in pixel
+        self.h: int = h  # image height in pixel
 
         self.fb_pid = PID('fb',
                           kP=0.7,
@@ -92,11 +96,13 @@ class FaceTracker(object):
         drone.streamon()
         drone.get_frame_read()
         drone.takeoff()
-        drone.send_rc_control(0, 0, 0, 0)
         drone.move_up(70)
         return drone
 
-    def _throttle(self):
+    def _throttle(self) -> bool:
+        """Decide whether need to throttle commands to Tello.
+        It reduce the command frequence up to FaceTracker.MAX_COMMAND_SEC commands per second.
+        """
         t = self.fps <= FaceTracker.MAX_COMMAND_SEC
         if not t:
             interval = self.fps // FaceTracker.MAX_COMMAND_SEC
@@ -106,6 +112,8 @@ class FaceTracker(object):
         return t
 
     def readFrame(self):
+        """Return the latest image captured by Tello. And resize to (w, h).
+        """
         frame = self.drone.get_frame_read()
         img = frame.frame
         img = cv2.resize(img, (self.w, self.h))
@@ -193,7 +201,10 @@ class FaceTracker(object):
             # Draw line from image center to face center
             iy, ix, _ = img.shape
             #face_center = (faceListCenter[i][0], faceListCenter[i][1])
-            cv2.arrowedLine(img, (ix // 2, iy // 2), tuple(faceListCenter[i]), color=(0, 255, 0), thickness=2)
+            cv2.arrowedLine(img, (ix // 2, iy // 2),
+                            tuple(faceListCenter[i]),
+                            color=(0, 255, 0),
+                            thickness=2)
             return img, [faceListCenter[i], faceListArea[i]]
         else:
             return img, [[0, 0], 0]

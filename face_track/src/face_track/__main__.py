@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import sys
 
 import cv2
@@ -22,7 +25,7 @@ def main(args=None):
         alpha.putBattery(img)
         alpha.putTemperature(img)
         alpha.putFlight(img)
-        cv2.imshow("alpha drone", img)
+        cv2.imshow("Alpha Drone", img)
         if cv2.waitKey(1) != -1:
             break
 

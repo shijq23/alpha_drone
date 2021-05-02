@@ -1,4 +1,3 @@
-# import necessary packages
 # -*- coding: utf-8 -*-
 import time
 import logging
