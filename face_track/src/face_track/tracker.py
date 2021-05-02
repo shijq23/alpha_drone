@@ -179,9 +179,9 @@ class FaceTracker(object):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = self.face_cascade.detectMultiScale(image=gray,
                                                    scaleFactor=1.3,
-                                                   minNeighbors=8,
-                                                   minSize=(20, 30),
-                                                   maxSize=(160, 200))
+                                                   minNeighbors=5,
+                                                   minSize=(20, 20),
+                                                   maxSize=(200, 200))
 
         faceListCenter = []
         faceListArea = []
