@@ -9,8 +9,8 @@ import time
 
 import cv2
 import numpy as np
-from face_track.mockdjitellopy import Tello
-#from djitellopy import Tello
+#from face_track.mockdjitellopy import Tello
+from djitellopy import Tello
 
 from face_track.pid import PID
 
@@ -53,7 +53,7 @@ class FaceTracker(object):
     #Tello.LOGGER.setLevel(logging.DEBUG)
     #PID.LOGGER.setLevel(logging.DEBUG)
 
-    def __init__(self, w: int = 320, h: int = 240) -> None:
+    def __init__(self, w: int = 640, h: int = 480) -> None:
         """Initialize a FaceTracker instance
         :param w: the image width in pixel (x)
         :param h: the image height in pizel (y)
@@ -198,7 +198,7 @@ class FaceTracker(object):
 
             faceListCenter.append([cx, cy])
             faceListArea.append(area)
-            cv2.circle(img, (cx, cy), 4, (0, 255, 0), cv2.FILLED)
+            # cv2.circle(img, (cx, cy), 4, (0, 255, 0), cv2.FILLED)
 
             # roi_gray = gray[y:y + h, x:x + w]
             # roi_color = img[y:y + h, x:x + w]
