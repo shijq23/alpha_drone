@@ -89,6 +89,7 @@ class FaceTracker(object):
         self.override_time: float = 0.0
 
         self.video = None
+        self.recorder = None
         self.annotatedImage = None
         self.keepRecording: bool = False
 
@@ -294,17 +295,9 @@ class FaceTracker(object):
         self.annotatedImage = img
 
     def recordVideo(self):
-        while self.keepRecording:
-            if self.annotatedImage is not None:
-                self.video.write(self.annotatedImage)
-                time.sleep(1.0 / FaceTracker.RECORD_FRAME_RATE)
-        self.video.release()
-
-    def startVideoRecord(self):
-        # create a VideoWrite object, recoring to ./video.avi
+        """record video to an unqiue avi file"""
         if self.video:
             return
-
         def uniq_filename() -> str:
             fn = f"vid-{datetime.datetime.now().strftime('%Y%m%d_%I%M%S')}.avi"
             return fn
@@ -313,6 +306,16 @@ class FaceTracker(object):
         self.video = cv2.VideoWriter(fn, cv2.VideoWriter_fourcc(*'XVID'),
                                      FaceTracker.RECORD_FRAME_RATE,
                                      (self.w, self.h))
+        while self.keepRecording:
+            if self.annotatedImage is not None:
+                self.video.write(self.annotatedImage)
+                time.sleep(1.0 / FaceTracker.RECORD_FRAME_RATE)
+        self.video.release()
+
+    def startVideoRecord(self):
+        """create a thread to record video"""
+        if self.recorder:
+            return
         self.recorder = threading.Thread(target=self.recordVideo)
         self.recorder.start()
 
