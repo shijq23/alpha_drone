@@ -10,7 +10,7 @@ from face_track import tracker
 request_run: bool = True
 
 
-def main(args=None):
+def main(args=None) -> int:
     """The main routine."""
     if args is None:
         args = sys.argv[1:]
@@ -21,7 +21,6 @@ def main(args=None):
         img = alpha.readFrame()
         img, info = alpha.findFace(img)
         alpha.trackFace(info)
-        #print("center", info[0], "area", info[1])
         alpha.putFPS(img)
         alpha.putBattery(img)
         alpha.putTemperature(img)
@@ -31,9 +30,9 @@ def main(args=None):
         if cv2.waitKey(1) != -1:
             break
 
-    #cap.release()
     cv2.destroyAllWindows()
     alpha.end()
+    return 0
 
 
 if __name__ == "__main__":

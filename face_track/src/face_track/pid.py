@@ -16,7 +16,7 @@ class PID(object):
     LOGGER = logging.getLogger('pid')
     LOGGER.addHandler(HANDLER)
     LOGGER.setLevel(logging.INFO)
-    DECAY_CONSTANT: float = 0.3  # how much the previous cv value decays
+    DECAY_CONSTANT: float = 0.1  # how much the previous cv value decays
 
     def __init__(self,
                  name: str = '',
@@ -71,7 +71,6 @@ class PID(object):
         # grab the current time and calculate delta time
         self.currTime = time.time()
         deltaTime = self.currTime - self.prevTime
-        deltaTime = 1.0
         # if deltaTime < PID.EPSILON:
         #     return self.cV
         error = self.SP - pv

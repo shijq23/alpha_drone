@@ -114,21 +114,21 @@ class Tello:
         Returns:
             float: acceleration
         """
-        return random.uniform(0.0, 100.0)
+        return round(random.uniform(0.0, 100.0), 2)
 
     def get_acceleration_y(self) -> float:
         """Y-Axis Acceleration
         Returns:
             float: acceleration
         """
-        return random.uniform(0.0, 100.0)
+        return round(random.uniform(0.0, 100.0), 2)
 
     def get_acceleration_z(self) -> float:
         """Z-Axis Acceleration
         Returns:
             float: acceleration
         """
-        return random.uniform(0.0, 100.0)
+        return round(random.uniform(0.0, 100.0), 2)
 
     def send_control_command(self,
                              command: str,

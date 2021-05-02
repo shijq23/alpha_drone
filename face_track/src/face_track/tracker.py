@@ -9,9 +9,9 @@ import time
 
 import cv2
 import numpy as np
+#rom face_track.mockdjitellopy import Tello
+from djitellopy import Tello
 
-from face_track.mockdjitellopy import Tello
-#from djitellopy import Tello
 from face_track.pid import PID
 
 # import mediapipe as mp
@@ -69,11 +69,11 @@ class FaceTracker(object):
         self.fb_pid = PID('fb',
                           kP=0.7,
                           kI=0.0,
-                          kD=-0.5,
+                          kD=0.1,
                           SP=math.sqrt(w * h / 10))
-        self.ud_pid = PID('ud', kP=0.7, kI=-0.0, kD=-0.5, SP=h / 2)
-        self.lr_pid = PID('lr', kP=-0.7, kI=-0.0, kD=0.5, SP=w / 2)
-        self.yaw_pid = PID('yaw', kP=-0.7, kI=-0.0, kD=0.5, SP=w / 2)
+        self.ud_pid = PID('ud', kP=0.7, kI=0.0, kD=0.1, SP=h / 2)
+        self.lr_pid = PID('lr', kP=-0.7, kI=-0.0, kD=-0.1, SP=w / 2)
+        self.yaw_pid = PID('yaw', kP=-0.7, kI=-0.0, kD=-0.1, SP=w / 2)
 
         self.fb_pid.reset()
         self.lr_pid.reset()
@@ -150,24 +150,24 @@ class FaceTracker(object):
             yaw_v = 0
         else:
             # left_right_velocity
-            lr_v = int(self.lr_pid.update(cx))
-            lr_v = clip(lr_v, -5, 5)
-            # lr_v = 0
+            # lr_v = int(self.lr_pid.update(cx))
+            # lr_v = clip(lr_v, -5, 5)
+            lr_v = 0
 
             # forward_backward_velocity
             pv = math.sqrt(area)
             fb_v = int(self.fb_pid.update(pv))
-            fb_v = clip(fb_v, -20, 20)
+            fb_v = clip(fb_v, -30, 30)
             # fb_v = 0
 
             # up_down_velocity
             ud_v = int(self.ud_pid.update(cy))
-            ud_v = clip(ud_v, -10, 10)
+            ud_v = clip(ud_v, -20, 20)
             # ud_v = 0
 
             # yaw_velocity
             yaw_v = int(self.yaw_pid.update(cx))
-            yaw_v = clip(yaw_v, -20, 20)
+            yaw_v = clip(yaw_v, -30, 30)
             # yaw_v = 0
 
         #if self._throttle():
@@ -265,15 +265,16 @@ class FaceTracker(object):
     def putFlight(self, img) -> None:
         ih, iw, ic = img.shape
         color = (100, 255, 0)
-        cv2.putText(img, f"x: {self.drone.get_acceleration_x()}", (7, 30 + 22),
-                    cv2.FONT_HERSHEY_PLAIN, 1, (100, 255, 0), 1, cv2.LINE_AA)
-        cv2.putText(img, f"y: {self.drone.get_acceleration_y()}",
+        cv2.putText(img, f"x': {self.drone.get_acceleration_x()}",
+                    (7, 30 + 22), cv2.FONT_HERSHEY_PLAIN, 1, (100, 255, 0), 1,
+                    cv2.LINE_AA)
+        cv2.putText(img, f"y': {self.drone.get_acceleration_y()}",
                     (7, 30 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
                     (100, 255, 0), 1, cv2.LINE_AA)
-        cv2.putText(img, f"z: {self.drone.get_acceleration_z()}",
+        cv2.putText(img, f"z': {self.drone.get_acceleration_z()}",
                     (7, 30 + 22 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
                     (100, 255, 0), 1, cv2.LINE_AA)
-        cv2.putText(img, f"h: {self.drone.get_distance_tof()}",
+        cv2.putText(img, f"h : {self.drone.get_distance_tof()}",
                     (7, 30 + 22 + 22 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
                     (100, 255, 0), 1, cv2.LINE_AA)
 
@@ -298,9 +299,11 @@ class FaceTracker(object):
         """record video to an unqiue avi file"""
         if self.video:
             return
+
         def uniq_filename() -> str:
-            fn = f"vid-{datetime.datetime.now().strftime('%Y%m%d_%I%M%S')}.avi"
+            fn = f"vid-{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.avi"
             return fn
+
         fn = uniq_filename()
         self.keepRecording = True
         self.video = cv2.VideoWriter(fn, cv2.VideoWriter_fourcc(*'XVID'),
