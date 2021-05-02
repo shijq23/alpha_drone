@@ -13,7 +13,13 @@ A face tracking Tello drone
 * [Python 3](https://www.python.org/)
 * [Open CV](https://opencv.org/)
 
-## Install
+## Install package
+
+```bash
+pip install --upgrade -e .
+```
+
+## Install requirements
 
 ```bash
 pip install -r requirements.txt
@@ -22,7 +28,15 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
-python3 tracker.py
+python3 -m face_track
+face_track
+python3 src/face_track/__main__.py
+```
+
+## Uninstall package
+
+```bash
+pip uninstall face_track
 ```
 
 ## Notes
@@ -43,3 +57,4 @@ This script has been adapted from following projects and tutorials.
 * [I Forced a Drone Bot To Follow Me](https://www.youtube.com/watch?v=4KiH3Fq3olM)
 * [Drone Face Tracking PID using OpenCV Pyhton](https://www.youtube.com/watch?v=P2wl3N2JW9c)
 * [First DJI Tello drone face tracking test with openCV](https://www.youtube.com/watch?v=WFz5I1iRhLY)
+* [Tello Drone Sandbox](https://github.com/youngsoul/tello-sandbox)

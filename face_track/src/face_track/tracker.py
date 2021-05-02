@@ -181,15 +181,19 @@ class FaceTracker(object):
             faceListArea.append(area)
             cv2.circle(img, (cx, cy), 4, (0, 255, 0), cv2.FILLED)
 
-            roi_gray = gray[y:y + h, x:x + w]
-            roi_color = img[y:y + h, x:x + w]
-            eyes = self.eye_cascade.detectMultiScale(roi_gray)
-            for (ex, ey, ew, eh) in eyes:
-                cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh),
-                              (0, 255, 0), 2)
+            # roi_gray = gray[y:y + h, x:x + w]
+            # roi_color = img[y:y + h, x:x + w]
+            # eyes = self.eye_cascade.detectMultiScale(roi_gray)
+            # for (ex, ey, ew, eh) in eyes:
+            #     cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh),
+            #                   (0, 255, 0), 2)
 
         if len(faceListArea) != 0:
             i = faceListArea.index(max(faceListArea))
+            # Draw line from image center to face center
+            iy, ix, _ = img.shape
+            #face_center = (faceListCenter[i][0], faceListCenter[i][1])
+            cv2.arrowedLine(img, (ix // 2, iy // 2), tuple(faceListCenter[i]), color=(0, 255, 0), thickness=2)
             return img, [faceListCenter[i], faceListArea[i]]
         else:
             return img, [[0, 0], 0]
