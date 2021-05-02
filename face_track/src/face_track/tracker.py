@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import datetime
 import logging
 import math
 import os
-import time
 import threading
-import datetime
+import time
 
 import cv2
 import numpy as np
@@ -266,8 +266,9 @@ class FaceTracker(object):
         color = (100, 255, 0)
         cv2.putText(img, f"x: {self.drone.get_acceleration_x()}", (7, 30 + 22),
                     cv2.FONT_HERSHEY_PLAIN, 1, (100, 255, 0), 1, cv2.LINE_AA)
-        cv2.putText(img, f"y: {self.drone.get_acceleration_y()}", (7, 30 + 22 + 22),
-                    cv2.FONT_HERSHEY_PLAIN, 1, (100, 255, 0), 1, cv2.LINE_AA)
+        cv2.putText(img, f"y: {self.drone.get_acceleration_y()}",
+                    (7, 30 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
+                    (100, 255, 0), 1, cv2.LINE_AA)
         cv2.putText(img, f"z: {self.drone.get_acceleration_z()}",
                     (7, 30 + 22 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
                     (100, 255, 0), 1, cv2.LINE_AA)
@@ -288,7 +289,7 @@ class FaceTracker(object):
         color = (100, 255, 0) if temp < 70 else (100, 0, 255)
         cv2.putText(img, f"TEMP: {temp}", (iw // 2 - 40, 30),
                     cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
-    
+
     def setAnnotatedImage(self, img) -> None:
         self.annotatedImage = img
 
@@ -298,18 +299,23 @@ class FaceTracker(object):
                 self.video.write(self.annotatedImage)
                 time.sleep(1.0 / FaceTracker.RECORD_FRAME_RATE)
         self.video.release()
-    
+
     def startVideoRecord(self):
         # create a VideoWrite object, recoring to ./video.avi
         if self.video:
             return
+
         def uniq_filename() -> str:
-            fn = str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time())
+            fn = str(datetime.datetime.now().date()) + '_' + str(
+                datetime.datetime.now().time())
             fn = fn.replace(':', '').replace('.', '').replace('-', '')
             return fn
+
         fn = 'vid-' + uniq_filename() + '.avi'
         self.keepRecording = True
-        self.video = cv2.VideoWriter(fn, cv2.VideoWriter_fourcc(*'XVID'), FaceTracker.RECORD_FRAME_RATE, (self.w, self.h))
+        self.video = cv2.VideoWriter(fn, cv2.VideoWriter_fourcc(*'XVID'),
+                                     FaceTracker.RECORD_FRAME_RATE,
+                                     (self.w, self.h))
         self.recorder = threading.Thread(target=self.recordVideo)
         self.recorder.start()
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import time
 import logging
+import time
 
 
 class PID(object):

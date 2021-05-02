@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """Mock library for interacting with DJI Ryze Tello drones.
 """
 
