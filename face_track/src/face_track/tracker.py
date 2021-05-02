@@ -9,8 +9,9 @@ import time
 import cv2
 import numpy as np
 
-from mockdjitellopy import Tello
-from pid import PID
+from face_track.mockdjitellopy import Tello
+#from djitellopy import Tello
+from face_track.pid import PID
 
 # import mediapipe as mp
 
@@ -241,13 +242,15 @@ class FaceTracker(object):
     def putFlight(self, img) -> None:
         ih, iw, ic = img.shape
         color = (100, 255, 0)
-        cv2.putText(img, f"x: {self.drone.get_speed_x()}", (7, 30 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
+        cv2.putText(img, f"x: {self.drone.get_speed_x()}", (7, 30 + 22),
+                    cv2.FONT_HERSHEY_PLAIN, 1, (100, 255, 0), 1, cv2.LINE_AA)
+        cv2.putText(img, f"y: {self.drone.get_speed_y()}", (7, 30 + 22 + 22),
+                    cv2.FONT_HERSHEY_PLAIN, 1, (100, 255, 0), 1, cv2.LINE_AA)
+        cv2.putText(img, f"z: {self.drone.get_speed_z()}",
+                    (7, 30 + 22 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
                     (100, 255, 0), 1, cv2.LINE_AA)
-        cv2.putText(img, f"y: {self.drone.get_speed_y()}", (7, 30 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
-                    (100, 255, 0), 1, cv2.LINE_AA)
-        cv2.putText(img, f"z: {self.drone.get_speed_z()}", (7, 30 + 22 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
-                    (100, 255, 0), 1, cv2.LINE_AA)
-        cv2.putText(img, f"h: {self.drone.get_distance_tof()}", (7, 30 + 22 + 22 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
+        cv2.putText(img, f"h: {self.drone.get_distance_tof()}",
+                    (7, 30 + 22 + 22 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
                     (100, 255, 0), 1, cv2.LINE_AA)
 
     def putBattery(self, img) -> None:
@@ -282,30 +285,3 @@ class FaceTracker(object):
             super().__del__(self)
         except AttributeError:
             pass
-
-
-request_run: bool = True
-
-
-def main():
-    alpha = FaceTracker()
-    while request_run:
-        img = alpha.readFrame()
-        img, info = alpha.findFace(img)
-        alpha.trackFace(info)
-        #print("center", info[0], "area", info[1])
-        alpha.putFPS(img)
-        alpha.putBattery(img)
-        alpha.putTemperature(img)
-        alpha.putFlight(img)
-        cv2.imshow("alpha drone", img)
-        if cv2.waitKey(1) != -1:
-            break
-
-    #cap.release()
-    cv2.destroyAllWindows()
-    alpha.end()
-
-
-if __name__ == "__main__":
-    main()
