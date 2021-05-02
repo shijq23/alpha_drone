@@ -110,6 +110,27 @@ class Tello:
         """
         return random.randrange(0, 101)
 
+    def get_acceleration_x(self) -> float:
+        """X-Axis Acceleration
+        Returns:
+            float: acceleration
+        """
+        return random.uniform(0.0, 100.0)
+
+    def get_acceleration_y(self) -> float:
+        """Y-Axis Acceleration
+        Returns:
+            float: acceleration
+        """
+        return random.uniform(0.0, 100.0)
+
+    def get_acceleration_z(self) -> float:
+        """Z-Axis Acceleration
+        Returns:
+            float: acceleration
+        """
+        return random.uniform(0.0, 100.0)
+
     def send_control_command(self,
                              command: str,
                              timeout: int = RESPONSE_TIMEOUT) -> bool:

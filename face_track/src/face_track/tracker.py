@@ -4,11 +4,13 @@ import logging
 import math
 import os
 import time
+import threading
+import datetime
 
 import cv2
 import numpy as np
 
-from face_track.djitellopy import Tello
+from face_track.mockdjitellopy import Tello
 #from djitellopy import Tello
 from face_track.pid import PID
 
@@ -27,6 +29,7 @@ class FaceTracker(object):
 
     MAX_COMMAND_SEC: int = 100  # throttle control, max number of commands per second
     OVERRIDE_PERIOD: float = 0.1  # key press override period in seconds
+    RECORD_FRAME_RATE: float = 10.0  # the video record frame rate per second
 
     cv2_base_dir = os.path.dirname(os.path.abspath(cv2.__file__))
     default_face = os.path.join(cv2_base_dir, "data",
@@ -84,6 +87,10 @@ class FaceTracker(object):
         self.ud_override: int = 0
         self.yaw_override: int = 0
         self.override_time: float = 0.0
+
+        self.video = None
+        self.annotatedImage = None
+        self.keepRecording: bool = False
 
     @staticmethod
     def initTello() -> Tello:
@@ -257,11 +264,11 @@ class FaceTracker(object):
     def putFlight(self, img) -> None:
         ih, iw, ic = img.shape
         color = (100, 255, 0)
-        cv2.putText(img, f"x: {self.drone.get_speed_x()}", (7, 30 + 22),
+        cv2.putText(img, f"x: {self.drone.get_acceleration_x()}", (7, 30 + 22),
                     cv2.FONT_HERSHEY_PLAIN, 1, (100, 255, 0), 1, cv2.LINE_AA)
-        cv2.putText(img, f"y: {self.drone.get_speed_y()}", (7, 30 + 22 + 22),
+        cv2.putText(img, f"y: {self.drone.get_acceleration_y()}", (7, 30 + 22 + 22),
                     cv2.FONT_HERSHEY_PLAIN, 1, (100, 255, 0), 1, cv2.LINE_AA)
-        cv2.putText(img, f"z: {self.drone.get_speed_z()}",
+        cv2.putText(img, f"z: {self.drone.get_acceleration_z()}",
                     (7, 30 + 22 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
                     (100, 255, 0), 1, cv2.LINE_AA)
         cv2.putText(img, f"h: {self.drone.get_distance_tof()}",
@@ -281,10 +288,38 @@ class FaceTracker(object):
         color = (100, 255, 0) if temp < 70 else (100, 0, 255)
         cv2.putText(img, f"TEMP: {temp}", (iw // 2 - 40, 30),
                     cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
+    
+    def setAnnotatedImage(self, img) -> None:
+        self.annotatedImage = img
+
+    def recordVideo(self):
+        while self.keepRecording:
+            if self.annotatedImage is not None:
+                self.video.write(self.annotatedImage)
+                time.sleep(1.0 / FaceTracker.RECORD_FRAME_RATE)
+        self.video.release()
+    
+    def startVideoRecord(self):
+        # create a VideoWrite object, recoring to ./video.avi
+        if self.video:
+            return
+        def uniq_filename() -> str:
+            fn = str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time())
+            fn = fn.replace(':', '').replace('.', '').replace('-', '')
+            return fn
+        fn = 'vid-' + uniq_filename() + '.avi'
+        self.keepRecording = True
+        self.video = cv2.VideoWriter(fn, cv2.VideoWriter_fourcc(*'XVID'), FaceTracker.RECORD_FRAME_RATE, (self.w, self.h))
+        self.recorder = threading.Thread(target=self.recordVideo)
+        self.recorder.start()
+
+    def stopVideoRecord(self):
+        self.keepRecording = False
 
     def end(self) -> None:
         FaceTracker.LOGGER.info("end")
         try:
+            self.keepRecording = False
             self.drone.end()
         except AttributeError:
             pass

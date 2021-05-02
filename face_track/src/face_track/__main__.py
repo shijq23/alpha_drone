@@ -16,6 +16,7 @@ def main(args=None):
         args = sys.argv[1:]
 
     alpha = tracker.FaceTracker()
+    alpha.startVideoRecord()
     while request_run:
         img = alpha.readFrame()
         img, info = alpha.findFace(img)
@@ -25,6 +26,7 @@ def main(args=None):
         alpha.putBattery(img)
         alpha.putTemperature(img)
         alpha.putFlight(img)
+        alpha.setAnnotatedImage(img)
         cv2.imshow("Alpha Drone", img)
         if cv2.waitKey(1) != -1:
             break

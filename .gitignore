@@ -131,4 +131,4 @@ dmypy.json
 # vscode
 .vscode
 picture.png
-video.avi
+vid*.avi
