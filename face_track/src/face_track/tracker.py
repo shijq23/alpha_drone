@@ -9,8 +9,8 @@ import time
 
 import cv2
 import numpy as np
-#rom face_track.mockdjitellopy import Tello
-from djitellopy import Tello
+from face_track.mockdjitellopy import Tello
+#from djitellopy import Tello
 
 from face_track.pid import PID
 
@@ -74,6 +74,7 @@ class FaceTracker(object):
         self.ud_pid = PID('ud', kP=0.7, kI=0.0, kD=0.1, SP=h / 2)
         self.lr_pid = PID('lr', kP=-0.7, kI=-0.0, kD=-0.1, SP=w / 2)
         self.yaw_pid = PID('yaw', kP=-0.7, kI=-0.0, kD=-0.1, SP=w / 2)
+        self.pid_cv:tuple = (0, 0, 0, 0)
 
         self.fb_pid.reset()
         self.lr_pid.reset()
@@ -127,7 +128,7 @@ class FaceTracker(object):
         img = cv2.resize(img, (self.w, self.h))
         return img
 
-    def trackFace(self, info) -> None:
+    def trackFace(self, info) -> tuple:
         area = info[1]
         cx, cy = info[0]
 
@@ -175,6 +176,8 @@ class FaceTracker(object):
         FaceTracker.LOGGER.debug(
             f"{lr_v:>3d} {fb_v:>3d} {ud_v:>3d} {yaw_v:>3d}")
         #print("fb", fb_v, "area", area, "error", error)
+        self.pid_cv = (lr_v, fb_v, ud_v, yaw_v)
+        return self.pid_cv
 
     def findFace(self, img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -277,6 +280,20 @@ class FaceTracker(object):
         cv2.putText(img, f"h : {self.drone.get_distance_tof()}",
                     (7, 30 + 22 + 22 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
                     (100, 255, 0), 1, cv2.LINE_AA)
+
+    def putPID(self, img) -> None:
+        ih, iw, ic = img.shape
+        # (lr_v, fb_v, ud_v, yaw_v)
+        color = (100, 255, 0)
+        cv2.putText(img, f"L-R: {self.pid_cv[0]}", (iw - 90, 30 + 22),
+                    cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
+        cv2.putText(img, f"F+B: {self.pid_cv[1]}", (iw - 90, 30 + 22 + 22),
+                    cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
+        cv2.putText(img, f"U|D: {self.pid_cv[2]}", (iw - 90, 30 + 22 + 22 + 22),
+                    cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
+        cv2.putText(img, f"YAW: {self.pid_cv[3]}", (iw - 90, 30 + 22 + 22 + 22 + 22),
+                    cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
+
 
     def putBattery(self, img) -> None:
         ih, iw, ic = img.shape

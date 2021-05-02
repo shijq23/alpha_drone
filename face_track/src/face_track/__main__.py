@@ -21,6 +21,7 @@ def main(args=None) -> int:
         img = alpha.readFrame()
         img, info = alpha.findFace(img)
         alpha.trackFace(info)
+        alpha.putPID(img)
         alpha.putFPS(img)
         alpha.putBattery(img)
         alpha.putTemperature(img)
