@@ -232,6 +232,23 @@ bitbake-layers add-layer ../layers/meta-clang/
 * [local.conf](./local.conf)
 * [bblayers.conf](./bblayers.conf)
 
+## GPIO
+
+detail information: [jetson-gpio](https://github.com/NVIDIA/jetson-gpio)
+
+```bash
+. venv/bin/activate
+pip install Jetson.GPIO
+sudo groupadd -f -r gpio
+sudo usermod -a -G gpio your_user_name
+sudo cp venv/lib/python3.7/site-packages/Jetson/GPIO/99-gpio.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules && sudo udevadm trigger
+
+git clone https://github.com/NVIDIA/jetson-gpio.git
+python3 jetson-gpio/samples/simple_input.py
+python3 jetson-gpio/samples/test_all_pins_input.py
+```
+
 ## Issues
 
 * when build python3-matplotlib, you need to copy the following bb files to $HOME/my-project/layers/meta-openembedded/meta-python/recipes-devtools/python/
