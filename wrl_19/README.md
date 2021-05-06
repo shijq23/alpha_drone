@@ -151,15 +151,15 @@ echo 'SECURITY_CFLAGS_pn-tini_append = " ${SECURITY_NOPIE_CFLAGS}"' >> conf/loca
 echo "NVIDIA_DEVNET_MIRROR='file:///home/$USER/Downloads/nvidia/sdkm_downloads'" >> conf/local.conf
 echo 'CUDA_BINARIES_NATIVE = "cuda-binaries-ubuntu1804-native"' >> conf/local.conf
 
-echo 'IMAGE_INSTALL_append += " cuda-samples cudnn tensorrt opencv python3-opencv "' >> conf/local.conf
-echo 'IMAGE_INSTALL_append += " git dpkg gcc make cmake automake autoconf time valgrind "' >> conf/local.conf
+echo 'IMAGE_INSTALL_append += " cuda-samples cuda-samples-dev cuda-curand-staticdev cuda-cublas-staticdev cuda-cusparse-staticdev cuda-npp-staticdev freeglut libegl-mesa-dev libgl-mesa-dev libglu-dev libxmu-dev cudnn tensorrt tensorrt-samples tensorrt-dev opencv python3-opencv "' >> conf/local.conf
+echo 'IMAGE_INSTALL_append += " git git-perltools dpkg gcc make cmake automake autoconf time valgrind "' >> conf/local.conf
 echo 'IMAGE_INSTALL_append += " python3-pip python3 python3-modules python3-setuptools python3-venv "' >> conf/local.conf
 echo 'IMAGE_INSTALL_append += " openssh-sshd openssh-scp e2fsprogs-resize2fs "' >> conf/local.conf
 echo 'IMAGE_INSTALL_append += " i2c-tools can-utils spitools libsdl2-dev hdf5 zip x11vnc "' >> conf/local.conf
 echo 'IMAGE_INSTALL_append += " alsa-lib alsa-utils pulseaudio vlc boost ffmpeg chromium-x11 "' >> conf/local.conf
 echo 'IMAGE_INSTALL_append += " linux-firmware iw bluez5 wpa-supplicant networkmanager ca-certificates lsb-release v4l-utils dhcp-client "' >> conf/local.conf
 
-echo 'IMAGE_INSTALL_append += " python3-dev python3-flask python3-protobuf python3-smbus python3-numpy python3-pillow python3-urllib3 python3-docopt python3-tornado python3-certifi python3-chardet python3-idna python3-requests python3-h5py python3-engineio python3-socketio python3-markupsafe python3-jinja2 python3-click python3-itsdangerous python3-werkzeug python3-dnspython python3-greenlet python3-eventlet python3-decorator python3-tqdm python3-dateutil python3-pytz python3-pandas python3-prettytable python3-paho-mqtt python3-spidev "' >> conf/local.conf
+echo 'IMAGE_INSTALL_append += " python3-dev python3-kiwisolver python3-cycler python3-pyparsing python3-matplotlib python3-flask python3-protobuf python3-smbus python3-numpy python3-pillow python3-urllib3 python3-docopt python3-tornado python3-certifi python3-chardet python3-idna python3-requests python3-h5py python3-engineio python3-socketio python3-markupsafe python3-jinja2 python3-click python3-itsdangerous python3-werkzeug python3-dnspython python3-greenlet python3-eventlet python3-decorator python3-tqdm python3-dateutil python3-pytz python3-pandas python3-prettytable python3-paho-mqtt python3-spidev "' >> conf/local.conf
 
 echo 'DISTRO_FEATURES_append += " ldconfig openstack wifi bluetooth bluez5 x11 "' >> conf/local.conf
 echo 'PREFERRED_PROVIDER_virtual/kernel = "linux-tegra"' >> conf/local.conf
@@ -231,6 +231,40 @@ bitbake-layers add-layer ../layers/meta-clang/
 
 * [local.conf](./local.conf)
 * [bblayers.conf](./bblayers.conf)
+
+## Issues
+
+* when build python3-matplotlib, you need to copy the following bb files to $HOME/my-project/layers/meta-openembedded/meta-python/recipes-devtools/python/
+  * [python3-cppy_1.1.0.bb](python3-cppy_1.1.0.bb)
+  * [python3-cycler_0.10.0.bb](python3-cycler_0.10.0.bb)
+  * [python3-kiwisolver_1.3.1.bb](python3-kiwisolver_1.3.1.bb)
+
+* when build cuda samples, use the following make command
+  
+  ```bash
+  GLPATH=/usr/lib64 make
+  ```
+
+* when build cuda samples with following warnings:
+
+  ```bash
+  >>> WARNING - libcuda.so not found, CUDA Driver is not installed.  Please re-install the driver. <<<
+  ```
+
+  create a symbolic link as following command
+  
+  ```bash
+  ln -s /usr/local/cuda-10.0 /usr/local/cuda
+  ln -s /usr/local/cuda-10.0/lib64/stubs /usr/local/cuda-10.0/targets/aarch64-linux/lib/stubs
+  ```
+
+* when run cuda samples with following error
+
+  ```bash  
+  freeglut (./oceanFFT):  ERROR:  Internal error <FBConfig with necessary capabilities not found> in function fgOpenWindow
+  ```
+
+  It is a freeglut bug, it doesn't render on remote X server from ubuntu client. Run the sample code on local display.
 
 ## Credits
 

@@ -258,16 +258,15 @@ class FaceTracker(object):
 
     def putFPS(self, img) -> None:
         cur_time = time.time()
-        fps = 1.0 / (cur_time - self.prev_time)
-        fps = int(fps)
+        fps:int = int(1.0 / (cur_time - self.prev_time))
         self.prev_time = cur_time
         self.fps = fps
         cv2.putText(img, f"FPS: {fps}", (7, 30), cv2.FONT_HERSHEY_PLAIN, 1,
                     (100, 255, 0), 1, cv2.LINE_AA)
 
     def putFlight(self, img) -> None:
-        ih, iw, ic = img.shape
-        color = (100, 255, 0)
+        #ih, iw, ic = img.shape
+        #color = (100, 255, 0)
         cv2.putText(img, f"x': {self.drone.get_acceleration_x()}",
                     (7, 30 + 22), cv2.FONT_HERSHEY_PLAIN, 1, (100, 255, 0), 1,
                     cv2.LINE_AA)

@@ -1,8 +1,10 @@
 # Alpha Drone
 
-A face tracking Tello drone on fprime
+A face tracking drone using OpenCV face recognition and PID control.
+The actual drone used in this project is TELLO, however the face recognition and PID control is generic.
+The ground station used in this project is Jetson Nano running Wind River Linux LTS 19.
 
-![TELLO](.data/tello.png)
+![TELLO](./data/tello.png)
 
 ## Hardware
 
