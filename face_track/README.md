@@ -58,3 +58,5 @@ This script has been adapted from following projects and tutorials.
 * [Drone Face Tracking PID using OpenCV Pyhton](https://www.youtube.com/watch?v=P2wl3N2JW9c)
 * [First DJI Tello drone face tracking test with openCV](https://www.youtube.com/watch?v=WFz5I1iRhLY)
 * [Tello Drone Sandbox](https://github.com/youngsoul/tello-sandbox)
+* [How to Tune a PID Controller](https://www.youtube.com/watch?v=IB1Ir4oCP5k)
+* [Empirical PID gain tuning (Kevin Lynch)](https://www.youtube.com/watch?v=uXnDwojRb1g)

@@ -8,6 +8,7 @@ class PID(object):
     """
 
     EPSILON = 1e-3  # the minium delta time in seconds
+    LOST_TIME = 0.2  # the default time for lost face tracking time in seconds
     HANDLER = logging.StreamHandler()
     FORMATTER = logging.Formatter(
         '[%(levelname)s] %(filename)s - %(lineno)d - %(message)s')
@@ -16,7 +17,6 @@ class PID(object):
     LOGGER = logging.getLogger('pid')
     LOGGER.addHandler(HANDLER)
     LOGGER.setLevel(logging.INFO)
-    DECAY_CONSTANT: float = 0.3  # how much the previous cv value decays
 
     def __init__(self,
                  name: str = '',
@@ -33,21 +33,21 @@ class PID(object):
         :return: None
         """
         super().__init__()
-        self.name = name
+        self.name: str = name
         # initialize gains
-        self.kP = kP
-        self.kI = kI
-        self.kD = kD
-        self.SP = SP
+        self.kP: float = kP
+        self.kI: float = kI
+        self.kD: float = kD
+        self.SP: float = SP
 
-        self.cP = 0.0
-        self.cI = 0.0
-        self.cD = 0.0
-        self.cV = 0.0
+        self.cP: float = 0.0
+        self.cI: float = 0.0
+        self.cD: float = 0.0
+        self.cV: float = 0.0
 
-        self.currTime = time.time()
-        self.prevTime = self.currTime
-        self.prevError = 0.0
+        self.currTime: float = time.time()
+        self.prevTime: float = self.currTime
+        self.prevError: float = 0.0
 
     def reset(self) -> None:
         # reset the current and previous time
@@ -70,7 +70,8 @@ class PID(object):
         """
         # grab the current time and calculate delta time
         self.currTime = time.time()
-        deltaTime = self.currTime - self.prevTime
+        deltaTime = min(self.currTime - self.prevTime, PID.LOST_TIME)
+
         # if deltaTime < PID.EPSILON:
         #     return self.cV
         error = self.SP - pv
@@ -91,11 +92,10 @@ class PID(object):
         self.prevError = error
 
         # sum the terms and return
-        cV = sum([self.kP * self.cP, self.kI * self.cI, self.kD * self.cD])
-        self.cV = self.cV * PID.DECAY_CONSTANT + (1.0 -
-                                                  PID.DECAY_CONSTANT) * cV
+        self.cV = sum(
+            [self.kP * self.cP, self.kI * self.cI, self.kD * self.cD])
         PID.LOGGER.debug(
-            f"{self.name} {self.cP} {self.cI} {self.cD} {cV} {self.cV}")
+            f"{self.name} {self.cP} {self.cI} {self.cD} {self.cV}")
 
         return self.cV
 

@@ -67,14 +67,14 @@ class FaceTracker(object):
         self.h: int = h  # image height in pixel
 
         self.fb_pid = PID('fb',
-                          kP=0.7,
-                          kI=0.0,
+                          kP=0.5,
+                          kI=0.01,
                           kD=0.1,
                           SP=math.sqrt(w * h / 10))
-        self.ud_pid = PID('ud', kP=0.7, kI=0.0, kD=0.1, SP=h / 2)
-        self.lr_pid = PID('lr', kP=-0.7, kI=-0.0, kD=-0.1, SP=w / 2)
-        self.yaw_pid = PID('yaw', kP=-0.7, kI=-0.0, kD=-0.1, SP=w / 2)
-        self.pid_cv:tuple = (0, 0, 0, 0)
+        self.ud_pid = PID('ud', kP=0.5, kI=0.01, kD=0.1, SP=h / 2)
+        self.lr_pid = PID('lr', kP=-0.5, kI=-0.01, kD=-0.1, SP=w / 2)
+        self.yaw_pid = PID('yaw', kP=-0.5, kI=-0.01, kD=-0.1, SP=w / 2)
+        self.pid_cv: tuple = (0, 0, 0, 0)
 
         self.fb_pid.reset()
         self.lr_pid.reset()
@@ -105,7 +105,7 @@ class FaceTracker(object):
         drone.streamon()
         drone.get_frame_read()
         drone.takeoff()
-        drone.move_up(70)
+        drone.move_up(75)
         return drone
 
     def _throttle(self) -> bool:
@@ -258,7 +258,7 @@ class FaceTracker(object):
 
     def putFPS(self, img) -> None:
         cur_time = time.time()
-        fps:int = int(1.0 / (cur_time - self.prev_time))
+        fps: int = int(1.0 / (cur_time - self.prev_time))
         self.prev_time = cur_time
         self.fps = fps
         cv2.putText(img, f"FPS: {fps}", (7, 30), cv2.FONT_HERSHEY_PLAIN, 1,
@@ -288,11 +288,12 @@ class FaceTracker(object):
                     cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
         cv2.putText(img, f"F+B: {self.pid_cv[1]}", (iw - 90, 30 + 22 + 22),
                     cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
-        cv2.putText(img, f"U|D: {self.pid_cv[2]}", (iw - 90, 30 + 22 + 22 + 22),
-                    cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
-        cv2.putText(img, f"YAW: {self.pid_cv[3]}", (iw - 90, 30 + 22 + 22 + 22 + 22),
-                    cv2.FONT_HERSHEY_PLAIN, 1, color, 1, cv2.LINE_AA)
-
+        cv2.putText(img, f"U|D: {self.pid_cv[2]}",
+                    (iw - 90, 30 + 22 + 22 + 22), cv2.FONT_HERSHEY_PLAIN, 1,
+                    color, 1, cv2.LINE_AA)
+        cv2.putText(img, f"YAW: {self.pid_cv[3]}",
+                    (iw - 90, 30 + 22 + 22 + 22 + 22), cv2.FONT_HERSHEY_PLAIN,
+                    1, color, 1, cv2.LINE_AA)
 
     def putBattery(self, img) -> None:
         ih, iw, ic = img.shape
