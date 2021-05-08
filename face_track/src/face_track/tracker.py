@@ -70,7 +70,7 @@ class FaceTracker(object):
                           kP=0.5,
                           kI=0.01,
                           kD=0.1,
-                          SP=math.sqrt(w * h / 10))
+                          SP=math.sqrt(w * h / 12))
         self.ud_pid = PID('ud', kP=0.5, kI=0.01, kD=0.1, SP=h / 2)
         self.lr_pid = PID('lr', kP=-0.5, kI=-0.01, kD=-0.1, SP=w / 2)
         self.yaw_pid = PID('yaw', kP=-0.5, kI=-0.01, kD=-0.1, SP=w / 2)
