@@ -159,7 +159,7 @@ echo 'IMAGE_INSTALL_append += " i2c-tools can-utils spitools libsdl2-dev hdf5 zi
 echo 'IMAGE_INSTALL_append += " alsa-lib alsa-utils pulseaudio vlc boost ffmpeg chromium-x11 "' >> conf/local.conf
 echo 'IMAGE_INSTALL_append += " linux-firmware iw bluez5 wpa-supplicant networkmanager ca-certificates lsb-release v4l-utils dhcp-client "' >> conf/local.conf
 
-echo 'IMAGE_INSTALL_append += " python3-dev python3-kiwisolver python3-cycler python3-pyparsing python3-matplotlib python3-flask python3-protobuf python3-smbus python3-numpy python3-pillow python3-urllib3 python3-docopt python3-tornado python3-certifi python3-chardet python3-idna python3-requests python3-h5py python3-engineio python3-socketio python3-markupsafe python3-jinja2 python3-click python3-itsdangerous python3-werkzeug python3-dnspython python3-greenlet python3-eventlet python3-decorator python3-tqdm python3-dateutil python3-pytz python3-pandas python3-prettytable python3-paho-mqtt python3-spidev "' >> conf/local.conf
+echo 'IMAGE_INSTALL_append += " python3-dev python3-kiwisolver python3-cycler python3-pyparsing python3-matplotlib python3-flask python3-protobuf python3-smbus python3-numpy python3-pillow python3-urllib3 python3-docopt python3-tornado python3-certifi python3-chardet python3-idna python3-requests python3-h5py python3-engineio python3-socketio python3-markupsafe python3-jinja2 python3-click python3-itsdangerous python3-werkzeug python3-dnspython python3-greenlet python3-eventlet python3-decorator python3-tqdm python3-dateutil python3-pytz python3-pandas python3-prettytable python3-paho-mqtt python3-spidev python3-pyserial "' >> conf/local.conf
 
 echo 'DISTRO_FEATURES_append += " ldconfig openstack wifi bluetooth bluez5 x11 "' >> conf/local.conf
 echo 'PREFERRED_PROVIDER_virtual/kernel = "linux-tegra"' >> conf/local.conf
@@ -248,6 +248,33 @@ git clone https://github.com/NVIDIA/jetson-gpio.git
 python3 jetson-gpio/samples/simple_input.py
 python3 jetson-gpio/samples/test_all_pins_input.py
 ```
+
+## Jetson Nano – UART
+
+[Jetson Nano – UART](https://www.jetsonhacks.com/2019/10/10/jetson-nano-uart/)
+
+J41 PIN      <---->  USB-TTL cable
+
+PIN 6 (GND)  <---->  GND (black)
+
+PIN 8 (TXD)  <---->  RXD (white)
+
+PIN 10 (RXD) <---->  TXD (green)
+
+![Wiring](./IMG_3143.webp)
+
+```bash
+git clone https://github.com/JetsonHacksNano/UARTDemo
+cd UARTDemo
+python3 uart_example.py
+```
+
+The following command enables serial console
+```bash
+sudo setsid /sbin/getty -L 115200 ttyTHS1
+```
+
+If you are using the UART as a Serial Console, you’re almost done. You just need to run a serial terminal program on the machine that you are connecting to the Jetson. I use PuTTY on a Windows 10 PC. I start PuTTY and select Serial with 115200 baud, 8 bits, no parity, 1 stop bit.
 
 ## Issues
 
