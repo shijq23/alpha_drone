@@ -15,7 +15,7 @@ sudo ./install.sh
 
 edit file /lib/systemd/system/x11vnc.service
 
-Any changes in the script will be will be applied after the next reboot.  
+Any changes in the script will be applied after the next reboot.  
 In order to apply changes immediately, you can run (as root)
 
 ```bash
