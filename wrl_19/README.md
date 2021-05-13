@@ -232,6 +232,17 @@ bitbake-layers add-layer ../layers/meta-clang/
 * [local.conf](./local.conf)
 * [bblayers.conf](./bblayers.conf)
 
+
+## Qt5
+
+```bash
+cd $HOME/my-project
+git clone --branch zeus  https://github.com/meta-qt5/meta-qt5.git layers/meta-qt5
+cd $HOME/my-project/build
+bitbake-layers add-layer ../layers/meta-qt5
+bitbake qtbase python3-pyqt5 python3-pyqtchart
+```
+
 ## GPIO
 
 detail information: [jetson-gpio](https://github.com/NVIDIA/jetson-gpio)
