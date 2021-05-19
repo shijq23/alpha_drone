@@ -16,7 +16,10 @@ A face tracking Tello drone
 ## Install package
 
 ```bash
-pip install --upgrade -e .
+python3 -m venv venv
+. venv/bin/activate
+pip3 install --upgrade pip wheel setuptools
+pip3 install --upgrade -e .
 ```
 
 ## Install requirements
@@ -37,6 +40,20 @@ python3 src/face_track/__main__.py
 
 ```bash
 pip uninstall face_track
+```
+
+## Issues
+
+* when face_track generates the following error:
+
+```bash
+Illegal instruction (core dumped)
+```
+  
+add "export OPENBLAS_CORETYPE=ARMV8" to the bottom of the .bashrc file
+
+```bash
+echo "export OPENBLAS_CORETYPE=ARMV8" >> ~/.bashrc
 ```
 
 ## Notes
