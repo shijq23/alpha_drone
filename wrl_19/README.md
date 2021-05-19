@@ -281,11 +281,62 @@ python3 uart_example.py
 ```
 
 The following command enables serial console
+
 ```bash
 sudo setsid /sbin/getty -L 115200 ttyTHS1
 ```
 
 If you are using the UART as a Serial Console, you’re almost done. You just need to run a serial terminal program on the machine that you are connecting to the Jetson. I use PuTTY on a Windows 10 PC. I start PuTTY and select Serial with 115200 baud, 8 bits, no parity, 1 stop bit.
+
+## CUDA samples
+
+If CUDA samples package is installed. You can build the samples from source code.
+
+```bash
+/usr/local/cuda-10.0/bin/cuda-install-samples-10.0.sh
+cd $HOME/NVIDIA_CUDA-10.0_Samples
+make
+```
+
+After build, All successful sample binaries are copied to the following folder:
+
+```bash
+$HOME/NVIDIA_CUDA-10.0_Samples/bin/aarch64/linux/release
+```
+
+Below are some samples:
+
+```bash
+$HOME/NVIDIA_CUDA-10.0_Samples/bin/aarch64/linux/release/particles
+```
+
+![particles](./cuda_particles.png)
+
+&nbsp;
+
+```bash
+$HOME/NVIDIA_CUDA-10.0_Samples/5_Simulations/oceanFFT/oceanFFT
+```
+
+![ocean FFT](./cuda_oceanFFT.png)
+
+&nbsp;
+
+```bash
+$HOME/NVIDIA_CUDA-10.0_Samples/5_Simulations/nbody/nbody
+```
+
+![nbody](./cuda_nbody.png)
+
+&nbsp;
+
+```bash
+$HOME/NVIDIA_CUDA-10.0_Samples/5_Simulations/smokeParticles/smokeParticles
+```
+
+![smoke](./cuda_smoke.png)
+
+&nbsp;
 
 ## Issues
 
