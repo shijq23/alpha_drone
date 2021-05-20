@@ -33,8 +33,10 @@ setup(
     description="Tello control to track human face",
     long_description="""
 This package contains the tello control to track human face. After running, the Tello drone first hovers to
-1.8 meters high, then starts to recognize and track the closest human face. PID control is applied to stablize
-the drone. Durin the flight, if any key is pressed, then program exits and the drone lands immediately.
+1.7 meters high, then starts to recognize and track the closest human face. PID control is applied to stablize
+the drone. Durin the flight, if any key is pressed, then program exits and the drone lands immediately. When
+face track python script is running, it automatically record video (640*480) to its working directory in the name
+vid-YYYYMMDD-hhmmss.avi.
     """,
     url="https://github.com/shijq23/alpha_drone",
     keywords=["tello", "embedded", "opencv", "AI", "drone", "PID"],

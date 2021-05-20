@@ -105,7 +105,7 @@ class FaceTracker(object):
         drone.streamon()
         drone.get_frame_read()
         drone.takeoff()
-        drone.move_up(75)
+        drone.move_up(70)
         return drone
 
     def _throttle(self) -> bool:
