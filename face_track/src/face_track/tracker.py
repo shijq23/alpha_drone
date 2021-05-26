@@ -66,13 +66,17 @@ class FaceTracker(object):
         self.w: int = w  # image width in pixel
         self.h: int = h  # image height in pixel
 
+        # terms for forward and backward speed control
         self.fb_pid = PID('fb',
                           kP=0.5,
                           kI=0.01,
                           kD=0.1,
                           SP=math.sqrt(w * h / 12))
+        # terms for up and down speed control
         self.ud_pid = PID('ud', kP=0.5, kI=0.01, kD=0.1, SP=h / 2)
+        # terms for left and right speed control
         self.lr_pid = PID('lr', kP=-0.5, kI=-0.01, kD=-0.1, SP=w / 2)
+        # terms for yaw speed control
         self.yaw_pid = PID('yaw', kP=-0.5, kI=-0.01, kD=-0.1, SP=w / 2)
         self.pid_cv: tuple = (0, 0, 0, 0)
 
@@ -180,6 +184,10 @@ class FaceTracker(object):
         return self.pid_cv
 
     def findFace(self, img):
+        """detect front faces in the image. If multiple faces are detected, it returs the face with largest area.
+        :param img: the image array in BGR
+        :return: the detected face center and its area
+        """
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = self.face_cascade.detectMultiScale(image=gray,
                                                    scaleFactor=1.3,

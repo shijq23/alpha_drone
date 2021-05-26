@@ -307,6 +307,14 @@ $HOME/NVIDIA_CUDA-10.0_Samples/bin/aarch64/linux/release
 Below are some samples:
 
 ```bash
+$HOME/NVIDIA_CUDA-10.0_Samples/bin/aarch64/linux/release/Mandelbrot
+```
+
+![Mandelbrot Set](./cuda_mandelbrot.png)
+
+&nbsp;
+
+```bash
 $HOME/NVIDIA_CUDA-10.0_Samples/bin/aarch64/linux/release/particles
 ```
 

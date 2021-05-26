@@ -56,6 +56,114 @@ add "export OPENBLAS_CORETYPE=ARMV8" to the bottom of the .bashrc file
 echo "export OPENBLAS_CORETYPE=ARMV8" >> ~/.bashrc
 ```
 
+## PID controller
+
+![PID](./640px-PID_en.svg.png)
+
+By Arturo Urquizo - <http://commons.wikimedia.org/wiki/File:PID.svg>, CC BY-SA 3.0, <https://commons.wikimedia.org/w/index.php?curid=17633925>
+
+The PID control value is calculated in the following function in [pid.py](./src/face_track/pid.py).
+
+```python
+def update(self, pv: float) -> float:
+    """ calculate the control value
+    :param pv: the process variable, the error = SP - PV (SP is the setpoint, and PV(t) is the process variable)
+    :return: the control variable
+    """
+    # grab the current time and calculate delta time
+    self.currTime = time.time()
+    deltaTime = min(self.currTime - self.prevTime, PID.LOST_TIME)
+
+    # if deltaTime < PID.EPSILON:
+    #     return self.cV
+    error = self.SP - pv
+    # calculate the delta error
+    deltaError = error - self.prevError
+
+    # calculate the proportional term
+    self.cP = error
+
+    # calculate the integral term
+    self.cI += error * deltaTime
+
+    # calculate the derivative term (and prevent divide by zero)
+    self.cD = (deltaError / deltaTime) if deltaTime > 0.0 else 0.0
+
+    # save previous time and error for the next update
+    self.prevTime = self.currTime
+    self.prevError = error
+
+    # sum the terms and return
+    self.cV = sum(
+        [self.kP * self.cP, self.kI * self.cI, self.kD * self.cD])
+    PID.LOGGER.debug(
+        f"{self.name} {self.cP} {self.cI} {self.cD} {self.cV}")
+
+    return self.cV
+```
+
+The actual proportional, integral, and derivative terms (denoted P, I, and D respectively) are tuned and defined in [tracker.py](./src/face_track/tracker.py)
+
+```python
+    # terms for forward and backward speed control
+    self.fb_pid = PID('fb',
+                      kP=0.5,
+                      kI=0.01,
+                      kD=0.1,
+                      SP=math.sqrt(w * h / 12))
+    # terms for up and down speed control
+    self.ud_pid = PID('ud', kP=0.5, kI=0.01, kD=0.1, SP=h / 2)
+    # terms for left and right speed control
+    self.lr_pid = PID('lr', kP=-0.5, kI=-0.01, kD=-0.1, SP=w / 2)
+    # terms for yaw speed control
+    self.yaw_pid = PID('yaw', kP=-0.5, kI=-0.01, kD=-0.1, SP=w / 2)
+```
+
+## Face Recognition
+
+The face recognition is performed by Harr classifier, which is the pre-trained face detection classifiers in OpenCV. This blog [Face Detection with Python using OpenCV](https://www.datacamp.com/community/tutorials/face-detection-python-opencv) provides more information on Harr classifier.
+
+```python
+    face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+
+    def findFace(self, img):
+        """detect front faces in the image. If multiple faces are detected, it returs the face with largest area.
+        :param img: the image array in BGR
+        :return: the detected face center and its area
+        """
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        faces = self.face_cascade.detectMultiScale(image=gray,
+                                                   scaleFactor=1.3,
+                                                   minNeighbors=5,
+                                                   minSize=(20, 20),
+                                                   maxSize=(200, 200))
+
+        faceListCenter = []
+        faceListArea = []
+
+        for (x, y, w, h) in faces:
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+            cx = x + w // 2
+            cy = y + h // 2
+            area = w * h
+
+            faceListCenter.append([cx, cy])
+            faceListArea.append(area)
+
+        if len(faceListArea) != 0:
+            i = faceListArea.index(max(faceListArea))
+            # Draw line from image center to face center
+            iy, ix, _ = img.shape
+            #face_center = (faceListCenter[i][0], faceListCenter[i][1])
+            cv2.arrowedLine(img, (ix // 2, iy // 2),
+                            tuple(faceListCenter[i]),
+                            color=(0, 255, 0),
+                            thickness=2)
+            return img, [faceListCenter[i], faceListArea[i]]
+        else:
+            return img, [[0, 0], 0]
+```
+
 ## Notes
 
 * use official TELLO app to update firmware

@@ -24,6 +24,10 @@ The ground station used in this project is Jetson Nano running Wind River Linux 
 
 For details on install, build, and run, refer to this [README](./wrl_19/README.md)
 
+* Mandelbrot Set
+
+  ![Mandelbrot Set](./wrl_19/cuda_mandelbrot.png)
+
 * Particles
 
   ![particles](./wrl_19/cuda_particles.png)
