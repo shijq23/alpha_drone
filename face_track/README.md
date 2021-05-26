@@ -121,10 +121,17 @@ The actual proportional, integral, and derivative terms (denoted P, I, and D res
 
 ## Face Recognition
 
-The face recognition is performed by Harr classifier, which is the pre-trained face detection classifiers in OpenCV. This blog [Face Detection with Python using OpenCV](https://www.datacamp.com/community/tutorials/face-detection-python-opencv) provides more information on Harr classifier.
+The face recognition is performed by Haar classifier, which is the pre-trained face detection classifiers in OpenCV. This blog [Face Detection with Python using OpenCV](https://www.datacamp.com/community/tutorials/face-detection-python-opencv) provides more information on Haar classifier. Haar classifier, compared to other methods, SSD, YOLO, etc, has the following advantages:
+
+* Lightweight
+* Fast (15 FPS on Jetson Nano)
+* Small model size (900KB)
+* Pre-trained
+
+The actual face recognition code is defined in [tracker.py](./src/face_track/tracker.py)
 
 ```python
-    face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+    self.face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
     def findFace(self, img):
         """detect front faces in the image. If multiple faces are detected, it returs the face with largest area.
