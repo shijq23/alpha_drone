@@ -58,6 +58,10 @@ echo "export OPENBLAS_CORETYPE=ARMV8" >> ~/.bashrc
 
 ## PID controller
 
+A proportional–integral–derivative controller (PID controller or three-term controller) is a control loop mechanism employing feedback that is widely used in industrial control systems and a variety of other applications requiring continuously modulated control. A PID controller continuously calculates an error value e(t) as the difference between a desired setpoint (SP) and a measured process variable (PV) and applies a correction based on proportional, integral, and derivative terms (denoted P, I, and D respectively), hence the name.
+
+By WIKIPEDIA - <https://en.wikipedia.org/wiki/PID_controller>
+
 ![PID](./640px-PID_en.svg.png)
 
 By Arturo Urquizo - <http://commons.wikimedia.org/wiki/File:PID.svg>, CC BY-SA 3.0, <https://commons.wikimedia.org/w/index.php?curid=17633925>
