@@ -232,7 +232,6 @@ bitbake-layers add-layer ../layers/meta-clang/
 * [local.conf](./local.conf)
 * [bblayers.conf](./bblayers.conf)
 
-
 ## Qt5
 
 ```bash
