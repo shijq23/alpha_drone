@@ -42,6 +42,23 @@ python3 src/face_track/__main__.py
 pip uninstall face_track
 ```
 
+## Simulation
+
+This script has a simulation module [mockdjitellopy.py](./src/face_track/mockdjitellopy.py). It enables development, tuning, and testing without physical tello drone. When the script is launched in development environment, it displays and records video. Below is a screenshot of the video.
+![sim](./sim_camera.png)
+
+* FPS: frames per second
+* x': x-axis acceleration
+* y': y-axis acceleration
+* z': z-axis acceleration
+* h : tof height (cm)
+* TEMP: temperature (Celsius)
+* BAT: battery percentage [0, 100]
+* L-R: left right velocity [-100, 100]
+* F+B: forward backward velocity [-100, 100]
+* U|D: up down velocity [-100, 100]
+* YAW: yaw velocity [-100, 100]
+
 ## Issues
 
 * when face_track generates the following error:
@@ -196,3 +213,4 @@ This script has been adapted from following projects and tutorials.
 * [Tello Drone Sandbox](https://github.com/youngsoul/tello-sandbox)
 * [How to Tune a PID Controller](https://www.youtube.com/watch?v=IB1Ir4oCP5k)
 * [Empirical PID gain tuning (Kevin Lynch)](https://www.youtube.com/watch?v=uXnDwojRb1g)
+* [Elon Musk face png](https://images.app.goo.gl/iwe2d6kBiLybTh6z8)

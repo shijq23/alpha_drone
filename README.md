@@ -48,4 +48,8 @@ For details on install, build, and run, refer to this [README](./wrl_19/README.m
 
 The Face Tracking package contains the tello control to track human face. After running, the Tello drone first hovers to 1.7 meters high, then starts to recognize and track the closest human face. PID control is applied to stablize the drone. Durin the flight, if any key is pressed, then program exits and the drone lands immediately. When face track python script is running, it automatically records video (640*480) to its working directory in the name vid-YYYYMMDD-hhmmss.avi.
 
+Here is a sample screen shot
+
+![sim](./face_track/sim_camera.png)
+
 For details on install, and run, refer to this [README](./face_track/README.md)
