@@ -288,6 +288,12 @@ sudo setsid /sbin/getty -L 115200 ttyTHS1
 
 If you are using the UART as a Serial Console, you’re almost done. You just need to run a serial terminal program on the machine that you are connecting to the Jetson. I use PuTTY on a Windows 10 PC. I start PuTTY and select Serial with 115200 baud, 8 bits, no parity, 1 stop bit.
 
+## Xfce Desktop Environment
+
+Xfce feature is enabled in the build. Below is a snapshot of the screen.
+
+![snapshot](./snapshot.png)
+
 ## CUDA samples
 
 If CUDA samples package is installed. You can build the samples from source code.
